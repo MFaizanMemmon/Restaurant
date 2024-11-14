@@ -1,0 +1,685 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7EC46526-66D9-4ECB-B53E-62C86F18F440}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Restaurant</RootNamespace>
+    <AssemblyName>Restaurant</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CrystalDecisions.CrystalReports.Engine, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.Engine.13.0.4000\lib\net40\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.ClientDoc, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.ClientDoc.13.0.4000\lib\net40\CrystalDecisions.ReportAppServer.ClientDoc.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.CommonControls, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.CommonControls.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.CommonControls.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.CommonObjectModel, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.CommonObjectModel.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.CommonObjectModel.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.Controllers, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.Controllers.13.0.4000\lib\net40\CrystalDecisions.ReportAppServer.Controllers.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.CubeDefModel, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.CubeDefModel.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.CubeDefModel.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.DataDefModel, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.DataDefModel.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.DataDefModel.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.DataSetConversion, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.DataSetConversion.13.0.4000\lib\net40\CrystalDecisions.ReportAppServer.DataSetConversion.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.ObjectFactory, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.ObjectFactory.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.ObjectFactory.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.Prompting, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.Prompting.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.Prompting.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.ReportDefModel, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.ReportDefModel.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.ReportDefModel.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.XmlSerialize, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.ReportAppServer.XmlSerialize.13.0.4003\lib\net40\CrystalDecisions.ReportAppServer.XmlSerialize.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportSource, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalDecisions.ReportSource.1.0.0\lib\CrystalDecisions.ReportSource.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <HintPath>packages\CrystalReports.Shared.13.0.4000\lib\net40\CrystalDecisions.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="CrystalDecisions.Windows.Forms, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="Guna.UI2, Version=2.0.4.6, Culture=neutral, PublicKeyToken=8b9d14aa5142e261, processorArchitecture=MSIL">
+      <HintPath>packages\Guna.UI2.WinForms.2.0.4.6\lib\net472\Guna.UI2.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=2.0.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>packages\log4net.2.0.12\lib\net45\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CustomMessageBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomMessageBox.Designer.cs">
+      <DependentUpon>CustomMessageBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DSBill.cs">
+      <DependentUpon>DSBill.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DSBill.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DSBill.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DsCashLedger.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DsCashLedger.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DSDeleteBill.cs">
+      <DependentUpon>DSDeleteBill.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DSDeleteBill.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DSDeleteBill.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="FormCashLedger.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormCashLedger.Designer.cs">
+      <DependentUpon>FormCashLedger.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormHome.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHome.Designer.cs">
+      <DependentUpon>FormHome.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormPrint.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormPrint.Designer.cs">
+      <DependentUpon>FormPrint.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginForm.Designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainClass.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormAddCustomer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormAddCustomer.Designer.cs">
+      <DependentUpon>FormAddCustomer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormBill.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormBill.Designer.cs">
+      <DependentUpon>FormBill.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormBillList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormBillList.Designer.cs">
+      <DependentUpon>FormBillList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormCashinAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormCashinAdd.Designer.cs">
+      <DependentUpon>FormCashinAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormCategoryAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormCategoryAdd.Designer.cs">
+      <DependentUpon>FormCategoryAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormCheckOut.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormCheckOut.Designer.cs">
+      <DependentUpon>FormCheckOut.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormExpenseAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormExpenseAdd.Designer.cs">
+      <DependentUpon>FormExpenseAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormExpenseInsert.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormExpenseInsert.Designer.cs">
+      <DependentUpon>FormExpenseInsert.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormPaidBill.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormPaidBill.Designer.cs">
+      <DependentUpon>FormPaidBill.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormPOS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormPOS.Designer.cs">
+      <DependentUpon>FormPOS.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormPosReturn.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormPosReturn.Designer.cs">
+      <DependentUpon>FormPosReturn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormProductAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormProductAdd.Designer.cs">
+      <DependentUpon>FormProductAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormStaffAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormStaffAdd.Designer.cs">
+      <DependentUpon>FormStaffAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormTableAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormTableAdd.Designer.cs">
+      <DependentUpon>FormTableAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormTableSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormTableSelect.Designer.cs">
+      <DependentUpon>FormTableSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormVenderAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormVenderAdd.Designer.cs">
+      <DependentUpon>FormVenderAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\FormWaiterSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Model\FormWaiterSelect.Designer.cs">
+      <DependentUpon>FormWaiterSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\UsProduct.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Model\UsProduct.Designer.cs">
+      <DependentUpon>UsProduct.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Reportss\crptCashLedger.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crptCashLedger.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reportss\crptOrderReports.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crptOrderReports.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reportss\FormSaleByCategory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reportss\FormSaleByCategory.Designer.cs">
+      <DependentUpon>FormSaleByCategory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reportss\rptBill.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>rptBill.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reportss\rptMenu.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>rptMenu.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reportss\rptDeleteItem.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>rptDeleteItem.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reportss\rptSaleByCategory.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>rptSaleByCategory.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Reportss\rptStaff.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>rptStaff.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SampleAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SampleAdd.Designer.cs">
+      <DependentUpon>SampleAdd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SampleView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SampleView.Designer.cs">
+      <DependentUpon>SampleView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\ExpenseView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\ExpenseView.Designer.cs">
+      <DependentUpon>ExpenseView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormBillView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormBillView.Designer.cs">
+      <DependentUpon>FormBillView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormCashinView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormCashinView.Designer.cs">
+      <DependentUpon>FormCashinView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormCategoryView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormCategoryView.Designer.cs">
+      <DependentUpon>FormCategoryView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormKitchenView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormKitchenView.Designer.cs">
+      <DependentUpon>FormKitchenView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormProductView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormProductView.Designer.cs">
+      <DependentUpon>FormProductView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormReports.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormReports.Designer.cs">
+      <DependentUpon>FormReports.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormSetting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormSetting.Designer.cs">
+      <DependentUpon>FormSetting.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormStaffView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormStaffView.Designer.cs">
+      <DependentUpon>FormStaffView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormTableView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormTableView.Designer.cs">
+      <DependentUpon>FormTableView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\FormVenderView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\FormVenderView.Designer.cs">
+      <DependentUpon>FormVenderView.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="FormCashLedger.resx">
+      <DependentUpon>FormCashLedger.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHome.resx">
+      <DependentUpon>FormHome.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormPrint.resx">
+      <DependentUpon>FormPrint.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginForm.resx">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormAddCustomer.resx">
+      <DependentUpon>FormAddCustomer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormBill.resx">
+      <DependentUpon>FormBill.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormBillList.resx">
+      <DependentUpon>FormBillList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormCashinAdd.resx">
+      <DependentUpon>FormCashinAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormCategoryAdd.resx">
+      <DependentUpon>FormCategoryAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormCheckOut.resx">
+      <DependentUpon>FormCheckOut.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormExpenseAdd.resx">
+      <DependentUpon>FormExpenseAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormExpenseInsert.resx">
+      <DependentUpon>FormExpenseInsert.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormPaidBill.resx">
+      <DependentUpon>FormPaidBill.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormPOS.resx">
+      <DependentUpon>FormPOS.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormPosReturn.resx">
+      <DependentUpon>FormPosReturn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormProductAdd.resx">
+      <DependentUpon>FormProductAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormStaffAdd.resx">
+      <DependentUpon>FormStaffAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormTableAdd.resx">
+      <DependentUpon>FormTableAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormTableSelect.resx">
+      <DependentUpon>FormTableSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormVenderAdd.resx">
+      <DependentUpon>FormVenderAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\FormWaiterSelect.resx">
+      <DependentUpon>FormWaiterSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model\UsProduct.resx">
+      <DependentUpon>UsProduct.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\crptCashLedger.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crptCashLedger.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\crptOrderReports.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crptOrderReports.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\FormSaleByCategory.resx">
+      <DependentUpon>FormSaleByCategory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\rptBill.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>rptBill.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\rptMenu.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>rptMenu.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\rptDeleteItem.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>rptDeleteItem.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\rptSaleByCategory.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>rptSaleByCategory.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reportss\rptStaff.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>rptStaff.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SampleAdd.resx">
+      <DependentUpon>SampleAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SampleView.resx">
+      <DependentUpon>SampleView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\ExpenseView.resx">
+      <DependentUpon>ExpenseView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormBillView.resx">
+      <DependentUpon>FormBillView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormCashinView.resx">
+      <DependentUpon>FormCashinView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormCategoryView.resx">
+      <DependentUpon>FormCategoryView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormKitchenView.resx">
+      <DependentUpon>FormKitchenView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormProductView.resx">
+      <DependentUpon>FormProductView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormReports.resx">
+      <DependentUpon>FormReports.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormSetting.resx">
+      <DependentUpon>FormSetting.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormStaffView.resx">
+      <DependentUpon>FormStaffView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormTableView.resx">
+      <DependentUpon>FormTableView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\FormVenderView.resx">
+      <DependentUpon>FormVenderView.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="DSBill.xsc">
+      <DependentUpon>DSBill.xsd</DependentUpon>
+    </None>
+    <None Include="DSBill.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DSBill.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="DSBill.xss">
+      <DependentUpon>DSBill.xsd</DependentUpon>
+    </None>
+    <None Include="DsCashLedger.xsc">
+      <DependentUpon>DsCashLedger.xsd</DependentUpon>
+    </None>
+    <None Include="DsCashLedger.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DsCashLedger.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="DsCashLedger.xss">
+      <DependentUpon>DsCashLedger.xsd</DependentUpon>
+    </None>
+    <None Include="DSDeleteBill.xsc">
+      <DependentUpon>DSDeleteBill.xsd</DependentUpon>
+    </None>
+    <None Include="DSDeleteBill.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>DSDeleteBill.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="DSDeleteBill.xss">
+      <DependentUpon>DSDeleteBill.xsd</DependentUpon>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="Resources\user img.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{C0C07587-41A7-46C8-8FBD-3F9C8EBE2DDC}" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\201-2018208_clipart-restaurant-icon-restaurant-symbol-white-png.png" />
+    <Content Include="Resources\3569998-removebg-preview.png" />
+    <None Include="Resources\360_F_269985260_EnUKmOVngTL4kLfci48i6vWQvt0KsYJx.jpg" />
+    <None Include="Resources\3569998-removebg-preview1.png" />
+    <Content Include="Resources\500_F_276641400_GhXICex0pRspftczL2rpvDSZFyYga5xg-removebg-preview.png" />
+    <None Include="Resources\52-528139_free-twitter-white-icon-png-employee-icon-white-removebg-preview.png" />
+    <None Include="Resources\52-528139_free-twitter-white-icon-png-employee-icon-white-removebg-preview1.png" />
+    <None Include="Resources\500_F_276641400_GhXICex0pRspftczL2rpvDSZFyYga5xg-removebg-preview1.png" />
+    <Content Include="Resources\birani-removebg-preview.png" />
+    <Content Include="Resources\categor-removebg-preview.png" />
+    <Content Include="Resources\categor-removebg-preview1.png" />
+    <Content Include="Resources\cateors-removebg-preview.png" />
+    <Content Include="Resources\cateors-removebg-preview1.png" />
+    <Content Include="Resources\colour-block-red-kitchen-removebg-preview %281%29.png" />
+    <Content Include="Resources\exit-removebg-preview.png" />
+    <Content Include="Resources\home_img-removebg-preview.png" />
+    <Content Include="Resources\images %281%29.jpeg" />
+    <Content Include="Resources\images-removebg-preview.png" />
+    <Content Include="Resources\images-removebg-preview1.png" />
+    <Content Include="Resources\images-removebg-preview2.png" />
+    <Content Include="Resources\images-removebg-preview3.png" />
+    <None Include="Resources\images-removebg-preview4.png" />
+    <None Include="Resources\images-removebg-preview5.png" />
+    <Content Include="Resources\images__1_-removebg-preview.png" />
+    <None Include="Resources\images__2_-removebg-preview.png" />
+    <None Include="Resources\images__2_-removebg-preview1.png" />
+    <None Include="Resources\images__2_-removebg-preview2.png" />
+    <None Include="Resources\images__1_-removebg-preview1.png" />
+    <Content Include="Resources\images__3_-removebg-preview.png" />
+    <None Include="Resources\images__3_-removebg-preview1.png" />
+    <Content Include="Resources\images__4_-removebg-preview.png" />
+    <Content Include="Resources\images__5_-removebg-preview.png" />
+    <Content Include="Resources\images__6_-removebg-preview.png" />
+    <None Include="Resources\img-removebg-preview.png" />
+    <None Include="Resources\img-removebg-preview1.png" />
+    <None Include="Resources\img-removebg-preview2.png" />
+    <None Include="Resources\img-removebg-preview3.png" />
+    <None Include="Resources\img-removebg-preview4.png" />
+    <None Include="Resources\output-onlinepngtools %281%29.png" />
+    <Content Include="Resources\pen-removebg-preview.png" />
+    <Content Include="Resources\pen-removebg-preview1.png" />
+    <Content Include="Resources\Phone-removebg-preview.png" />
+    <Content Include="Resources\png-transparent-exit-sign-exit-sign-orange-circle-stock-photography-removebg-preview.png" />
+    <Content Include="Resources\product-removebg-preview %281%29.png" />
+    <Content Include="Resources\Product-removebg-preview.png" />
+    <Content Include="Resources\reccle-removebg-preview.png" />
+    <Content Include="Resources\reccle-removebg-preview1.png" />
+    <Content Include="Resources\reccle-removebg-preview2.png" />
+    <Content Include="Resources\reccle-removebg-preview3.png" />
+    <Content Include="Resources\reccle-removebg-preview4.png" />
+    <Content Include="Resources\reccle-removebg-preview5.png" />
+    <Content Include="Resources\reccle-removebg-preview6.png" />
+    <Content Include="Resources\ren-removebg-preview %281%29.png" />
+    <Content Include="Resources\ren-removebg-preview %281%291.png" />
+    <Content Include="Resources\ren-removebg-preview %281%292.png" />
+    <Content Include="Resources\ren-removebg-preview %281%293.png" />
+    <Content Include="Resources\ren-removebg-preview %281%294.png" />
+    <Content Include="Resources\ren-removebg-preview %281%295.png" />
+    <Content Include="Resources\ren-removebg-preview %281%296.png" />
+    <Content Include="Resources\ren-removebg-preview %281%297.png" />
+    <Content Include="Resources\ren-removebg-preview.png" />
+    <Content Include="Resources\ren-removebg-preview1.png" />
+    <None Include="Resources\restaurant.png" />
+    <None Include="Resources\restaurant1.png" />
+    <None Include="Resources\restaurant2.png" />
+    <Content Include="Resources\Search-removebg-preview.png" />
+    <Content Include="Resources\spon-removebg-preview.png" />
+    <Content Include="Resources\staff.jpeg" />
+    <Content Include="Resources\Table-removebg-preview.png" />
+    <Content Include="Resources\take-out-cafe-restaurant-computer-icons-hotel-takeaway-removebg-preview.png" />
+    <Content Include="Resources\take-out-cafe-restaurant-computer-icons-hotel-takeaway.png" />
+    <Content Include="Resources\top-view-office-table-desk-workspace-with-calculator-black-pen-laptop-blue_101276-159.jpg" />
+    <Content Include="Resources\user_img-removebg-preview.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
