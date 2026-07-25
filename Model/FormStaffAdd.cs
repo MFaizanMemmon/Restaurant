@@ -21,36 +21,47 @@ namespace Restaurant.Model
         public int id = 0;
         public override void btnSave_Click(object sender, EventArgs e)
         {
-            string qry = "";
-
-            if (id == 0)
+            if (string.IsNullOrWhiteSpace(txtName.Text))
             {
-                qry = "Insert into Staff values (@Name , @Phone, @Role, @StaffRole )";
+                MessageBox.Show("Please enter the staff name.");
+                txtName.Focus();
+                return;
             }
-            else
+            if (cbRole.SelectedValue == null ||
+                !int.TryParse(cbRole.SelectedValue.ToString(), out int roleId))
             {
-                qry = "update Staff set StaffName = @Name, StaffPhone = @Phone ,RoleID = @Role ,StaffRole = @StaffRole  where StaffID = @id";
-                //guna2MessageDialog1.Show("Update Succesfull");
+                MessageBox.Show("Please select a staff role.");
+                cbRole.Focus();
+                return;
             }
 
-            Hashtable ht = new Hashtable();
-            ht.Add("@id", id);
-            ht.Add("@Name", txtName.Text);
-            ht.Add("@Phone", txtPhone.Text);
-            ht.Add("@Role", cbRole.SelectedValue);
-            ht.Add("@StaffRole", cbRole.Text);
+            string qry = id == 0
+                ? "INSERT INTO Staff (StaffName, StaffPhone, RoleID, StaffRole) VALUES (?, ?, ?, ?)"
+                : "UPDATE Staff SET StaffName = ?, StaffPhone = ?, RoleID = ?, StaffRole = ? WHERE StaffID = ?";
 
-            if (MainClass.SQL(qry, ht) > 0)
+            int affected;
+            using (var connection = new OleDbConnection(MainClass.con_string))
+            using (var command = new OleDbCommand(qry, connection))
+            {
+                command.Parameters.Add("@Name", OleDbType.VarWChar, 150).Value = txtName.Text.Trim();
+                command.Parameters.Add("@Phone", OleDbType.VarWChar, 50).Value = txtPhone.Text.Trim();
+                command.Parameters.Add("@RoleID", OleDbType.Integer).Value = roleId;
+                command.Parameters.Add("@StaffRole", OleDbType.VarWChar, 100).Value = cbRole.Text;
+                if (id != 0)
+                    command.Parameters.Add("@StaffID", OleDbType.Integer).Value = id;
+
+                connection.Open();
+                affected = command.ExecuteNonQuery();
+            }
+
+            if (affected > 0)
             {
                 MessageBox.Show("Operation has been successfully done", "Notification");
                 id = 0;
-                txtName.Text = "";
-                txtPhone.Text = "";
-                txtName.Focus();
-                txtPhone.Focus();
+                txtName.Clear();
+                txtPhone.Clear();
                 cbRole.SelectedIndex = -1;
-                this.Close();
-
+                Close();
             }
         }
 
@@ -58,12 +69,12 @@ namespace Restaurant.Model
         {
             string qry = @"SELECT DISTINCT RoleID, RoleName FROM TblRole";
 
-            using (OleDbDataAdapter adapter = new OleDbDataAdapter(qry, MainClass.con))
+            using (var connection = new OleDbConnection(MainClass.con_string))
+            using (OleDbDataAdapter adapter = new OleDbDataAdapter(qry, connection))
             {
                 DataTable dataTable = new DataTable();
                 try
                 {
-                    MainClass.con.Open();
                     adapter.Fill(dataTable);
                 }
                 catch (Exception ex)
@@ -71,11 +82,6 @@ namespace Restaurant.Model
                     // Handle exceptions (e.g., logging or displaying a message)
                     MessageBox.Show("Error: " + ex.Message);
                 }
-                finally
-                {
-                    MainClass.con.Close();
-                }
-
                 if (dataTable.Rows.Count > 0)
                 {
                     cbRole.DataSource = dataTable;
@@ -94,7 +100,10 @@ namespace Restaurant.Model
 
         private void FormStaffAdd_Load(object sender, EventArgs e)
         {
+            string selectedRole = cbRole.Text;
             LoadColumnNames();
+            if (id > 0 && !string.IsNullOrWhiteSpace(selectedRole))
+                cbRole.SelectedIndex = cbRole.FindStringExact(selectedRole);
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)

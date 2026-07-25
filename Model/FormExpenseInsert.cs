@@ -22,26 +22,25 @@ namespace Restaurant.Model
         public int id = 0;
         private void btnSave_Click(object sender, EventArgs e)
         {
-            string qry = "";
-
-            if (id == 0)
+            if (string.IsNullOrWhiteSpace(txtExpenseHead.Text))
             {
-                qry = "INSERT INTO TblExpenseHead (ExpenseHead) VALUES (@ExpenseHead)";
+                MessageBox.Show("Please enter an expense head.");
+                txtExpenseHead.Focus();
+                return;
             }
-            else
-            {
-                qry = "UPDATE TblExpenseHead SET ExpenseHead = @ExpenseHead WHERE ExpenseID = @id";
-            }
+            string qry = id == 0
+                ? "INSERT INTO TblExpenseHead (ExpenseHead) VALUES (?)"
+                : "UPDATE TblExpenseHead SET ExpenseHead = ? WHERE ExpenseID = ?";
 
             using (OleDbConnection conn = new OleDbConnection(MainClass.con_string))
             using (OleDbCommand cmd = new OleDbCommand(qry, conn))
             {
                 // Add parameters
-                cmd.Parameters.AddWithValue("@ExpenseHead", txtExpenseHead.Text);
+                cmd.Parameters.Add("@ExpenseHead", OleDbType.VarWChar, 150).Value = txtExpenseHead.Text.Trim();
 
                 if (id != 0)
                 {
-                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.Add("@id", OleDbType.Integer).Value = id;
                 }
 
                 try
@@ -90,12 +89,12 @@ namespace Restaurant.Model
             public void GetData()
         {
             OleDbConnection conn = new OleDbConnection(MainClass.con_string);
-            string qry = "SELECT * FROM TblExpenseHead WHERE ExpenseHead LIKE '%" + txtSearch.Text + "%'";
+            string qry = "SELECT * FROM TblExpenseHead WHERE ExpenseHead LIKE ?";
 
             OleDbCommand cmd = new OleDbCommand(qry, conn); // Initialize OleDbCommand
             conn.Open();
 
-            cmd.Parameters.AddWithValue("@ExpenseHead", "%" + txtSearch.Text + "%");
+            cmd.Parameters.Add("@ExpenseHead", OleDbType.VarWChar, 150).Value = "%" + txtSearch.Text + "%";
 
             OleDbDataReader dr = cmd.ExecuteReader(); // Execute query
 
@@ -117,9 +116,9 @@ namespace Restaurant.Model
         {
             if (datagridview1.CurrentCell.OwningColumn.Name == "dvgEdit")
             {
-                FormCategoryAdd frm = new FormCategoryAdd();
+                FormExpenseInsert frm = new FormExpenseInsert();
                 frm.id = Convert.ToInt16(datagridview1.CurrentRow.Cells["dvgid"].Value);
-                frm.txtName.Text = Convert.ToString(datagridview1.CurrentRow.Cells["dvgAdd"].Value);
+                frm.txtExpenseHead.Text = Convert.ToString(datagridview1.CurrentRow.Cells["dvgAdd"].Value);
                 MainClass.BlurBackground(frm);
                 GetData();
 

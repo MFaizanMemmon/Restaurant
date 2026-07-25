@@ -66,55 +66,36 @@ namespace Restaurant.Model
         public int id = 0;
         public override void btnSave_Click(object sender, EventArgs e)
         {
-            if (txtNotes.Text == string.Empty && txtAmount.Text == string.Empty)
+            if (!decimal.TryParse(txtAmount.Text, out decimal amount))
             {
-                MessageBox.Show("Please Enter proper data");
+                MessageBox.Show("Please enter a valid amount.");
+                txtAmount.Focus();
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(cbType.Text) || string.IsNullOrWhiteSpace(cbMode.Text))
+            {
+                MessageBox.Show("Please select the expense type and payment mode.");
                 return;
             }
 
-            string qry = "";
-
-            if (id == 0)
-            {
-                qry = "INSERT INTO TblExpence (ExpDate, ExpHead, paymenttype, Amount, Notes, createdBy, ModifyBy) " +
-                      "VALUES (@ExpDate, @ExpHead, @paymenttype, @Amount, @Notes, @createdBy, @ModifyBy)";
-            }
-            else
-            {
-                qry = "UPDATE TblExpence SET ExpDate = @ExpDate, ExpHead = @ExpHead, paymenttype = @paymenttype, " +
-                      "Amount = @Amount, Notes = @Notes, createdBy = @createdBy, ModifyBy = @ModifyBy WHERE ExpID = @id";
-            }
+            string qry = id == 0
+                ? "INSERT INTO TblExpence (ExpDate, ExpHead, PaymentType, Amount, Notes, createdBy, ModifyBy) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                : "UPDATE TblExpence SET ExpDate = ?, ExpHead = ?, PaymentType = ?, Amount = ?, Notes = ?, createdBy = ?, ModifyBy = ? WHERE ExpID = ?";
 
             using (OleDbConnection conn = new OleDbConnection(MainClass.con_string))
             using (OleDbCommand cmd = new OleDbCommand(qry, conn))
             {
-                // Convert text input to appropriate types
-                DateTime expDate;
-                if (!DateTime.TryParse(ExpDateTime.Value.ToShortDateString(), out expDate))
-                {
-                    MessageBox.Show("Invalid date format.");
-                    return;
-                }
-
-                decimal amount;
-                if (!decimal.TryParse(txtAmount.Text, out amount))
-                {
-                    MessageBox.Show("Invalid amount format.");
-                    return;
-                }
-
-                // Add parameters
-                cmd.Parameters.AddWithValue("@ExpDate", DateTime.Now);
-                cmd.Parameters.AddWithValue("@ExpHead", cbType.Text);
-                cmd.Parameters.AddWithValue("@paymenttype", cbMode.Text);
-                cmd.Parameters.AddWithValue("@Amount", amount);
-                cmd.Parameters.AddWithValue("@Notes", txtNotes.Text);
-                cmd.Parameters.AddWithValue("@createdBy", DateTime.Now); // Replace with actual user or appropriate value
-                cmd.Parameters.AddWithValue("@ModifyBy", DateTime.Now); // Replace with actual user or appropriate value
+                cmd.Parameters.Add("@ExpDate", OleDbType.Date).Value = ExpDateTime.Value;
+                cmd.Parameters.Add("@ExpHead", OleDbType.VarWChar, 150).Value = cbType.Text;
+                cmd.Parameters.Add("@PaymentType", OleDbType.VarWChar, 100).Value = cbMode.Text;
+                cmd.Parameters.Add("@Amount", OleDbType.Currency).Value = amount;
+                cmd.Parameters.Add("@Notes", OleDbType.LongVarWChar).Value = txtNotes.Text;
+                cmd.Parameters.Add("@createdBy", OleDbType.VarWChar, 100).Value = MainClass.USER ?? "";
+                cmd.Parameters.Add("@ModifyBy", OleDbType.VarWChar, 100).Value = MainClass.USER ?? "";
 
                 if (id != 0)
                 {
-                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.Add("@id", OleDbType.Integer).Value = id;
                 }
 
                 try
@@ -166,20 +147,23 @@ namespace Restaurant.Model
 
         private void FormExpenseAdd_Load(object sender, EventArgs e)
         {
+            LoadExpenseHeads();
             ForUpdateLoadData();
         }
 
         private void ForUpdateLoadData()
         {
             // Replace with parameterized query to prevent SQL injection
-            string qry = @"SELECT ExpDate, ExpHead, PaymentType, Amount, Notes 
+            if (id == 0) return;
+            string qry = @"SELECT ExpDate, ExpHead, PaymentType, Amount, Notes
                    FROM TblExpence 
-                   WHERE ExpID = @ExpID";
+                   WHERE ExpID = ?";
 
-            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
+            using (var connection = new OleDbConnection(MainClass.con_string))
+            using (OleDbCommand cmd = new OleDbCommand(qry, connection))
             {
                 // Add parameter to the query
-                cmd.Parameters.AddWithValue("@ExpID", id);
+                cmd.Parameters.Add("@ExpID", OleDbType.Integer).Value = id;
 
                 OleDbDataAdapter da = new OleDbDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -193,8 +177,8 @@ namespace Restaurant.Model
 
                     // Load additional fields
                     ExpDateTime.Value = Convert.ToDateTime(dt.Rows[0]["ExpDate"]);
-                    cbType.SelectedItem = dt.Rows[0]["ExpHead"].ToString(); // Assuming it's a string, adjust as needed
-                    cbMode.SelectedItem = dt.Rows[0]["PaymentType"].ToString(); // Assuming it's a string, adjust as needed
+                    cbType.SelectedValue = dt.Rows[0]["ExpHead"].ToString();
+                    cbMode.Text = dt.Rows[0]["PaymentType"].ToString();
                     txtAmount.Text = dt.Rows[0]["Amount"].ToString();
                     txtNotes.Text = dt.Rows[0]["Notes"].ToString();
                 }

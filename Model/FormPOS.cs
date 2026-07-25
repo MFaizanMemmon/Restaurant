@@ -476,40 +476,49 @@ namespace Restaurant.Model
 
             if (MainID == 0) // Insert
             {
-                qry1 = @"INSERT INTO TblMain (Date, Time, TableName, WaiterName, Status, OrderType, Total, Recieved, Change, DriverID, CustName, CustPhone)
-                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone);";
+                qry1 = @"INSERT INTO TblMain ([Date], [Time], TableName, WaiterName, [Status], OrderType, Total, Recieved, [Change], DriverID, CustName, CustPhone)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             }
             else // Update
             {
                 qry1 = @"UPDATE TblMain
-                 SET TableName = @TableName ,WaiterName = @WaiterName,Status = @Status,OrderType = @OrderType, 
-                    Total = @Total,Recieved = @Recieved, Change = @Change,IsOrderPrint = @IsOrderPrint,
-                    Time = @Time
-                 WHERE MainID = @ID;";
+                 SET TableName = ?, WaiterName = ?, [Status] = ?, OrderType = ?,
+                    Total = ?, Recieved = ?, [Change] = ?, IsOrderPrint = ?, [Time] = ?
+                 WHERE MainID = ?";
 
 
             }
 
             OleDbCommand cmd = new OleDbCommand(qry1, MainClass.con);
 
-            if (MainID != 0)
+            if (MainID == 0)
             {
-                cmd.Parameters.AddWithValue("@ID", MainID);
+                cmd.Parameters.Add("@Date", OleDbType.Date).Value = DateTime.Now.Date;
+                cmd.Parameters.Add("@Time", OleDbType.VarWChar, 30).Value = DateTime.Now.ToShortTimeString();
+                cmd.Parameters.Add("@TableName", OleDbType.VarWChar, 100).Value = lblTable.Text;
+                cmd.Parameters.Add("@WaiterName", OleDbType.VarWChar, 150).Value = lblWaiter.Text;
+                cmd.Parameters.Add("@Status", OleDbType.VarWChar, 50).Value = "Complete";
+                cmd.Parameters.Add("@OrderType", OleDbType.VarWChar, 50).Value = OrderType;
+                cmd.Parameters.Add("@Total", OleDbType.Currency).Value = Convert.ToDecimal(lbltotal.Text);
+                cmd.Parameters.Add("@Recieved", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@Change", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@DriverID", OleDbType.Integer).Value = DriverID;
+                cmd.Parameters.Add("@CustName", OleDbType.VarWChar, 150).Value = CustomerName ?? "";
+                cmd.Parameters.Add("@CustPhone", OleDbType.VarWChar, 50).Value = CustomerPhone ?? "";
             }
-            cmd.Parameters.AddWithValue("@Date", DateTime.Now.Date);
-            cmd.Parameters.AddWithValue("@Time", DateTime.Now.ToShortTimeString());
-            cmd.Parameters.AddWithValue("@TableName", lblTable.Text);
-            cmd.Parameters.AddWithValue("@WaiterName", lblWaiter.Text);
-            cmd.Parameters.AddWithValue("@Status", "Complete");
-            cmd.Parameters.AddWithValue("@OrderType", OrderType); // Make sure OrderType is provided and not null
-            cmd.Parameters.AddWithValue("@Total", Convert.ToDouble(lbltotal.Text));
-            cmd.Parameters.AddWithValue("@Recieved", Convert.ToDouble(0));
-            cmd.Parameters.AddWithValue("@Change", Convert.ToDouble(0));
-            cmd.Parameters.AddWithValue("@DriverID", DriverID);
-            cmd.Parameters.AddWithValue("@CustName", CustomerName);
-            cmd.Parameters.AddWithValue("@CustPhone", CustomerPhone);
-                
-            cmd.Parameters.AddWithValue("@IsOrderPrint", 0);
+            else
+            {
+                cmd.Parameters.Add("@TableName", OleDbType.VarWChar, 100).Value = lblTable.Text;
+                cmd.Parameters.Add("@WaiterName", OleDbType.VarWChar, 150).Value = lblWaiter.Text;
+                cmd.Parameters.Add("@Status", OleDbType.VarWChar, 50).Value = "Complete";
+                cmd.Parameters.Add("@OrderType", OleDbType.VarWChar, 50).Value = OrderType;
+                cmd.Parameters.Add("@Total", OleDbType.Currency).Value = Convert.ToDecimal(lbltotal.Text);
+                cmd.Parameters.Add("@Recieved", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@Change", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@IsOrderPrint", OleDbType.Boolean).Value = false;
+                cmd.Parameters.Add("@Time", OleDbType.VarWChar, 30).Value = DateTime.Now.ToShortTimeString();
+                cmd.Parameters.Add("@ID", OleDbType.Integer).Value = MainID;
+            }
 
             if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }
             if (MainID == 0) { cmd.ExecuteNonQuery(); MainID = MainClass.GetLastIdentity(); } else { cmd.ExecuteNonQuery(); }
@@ -554,8 +563,8 @@ namespace Restaurant.Model
 
                 if (DetailID == 0)
                 {
-                    qry2 = @"INSERT INTO TblDetail (MainID, ProID, Qty, Price, Amount) 
-                  VALUES (@MainID, @ProID, @Qty, @Price, @Amount)";
+                    qry2 = @"INSERT INTO TblDetail (MainID, ProID, Qty, Price, Amount)
+                  VALUES (?, ?, ?, ?, ?)";
                 }
                 //else
                 //{
@@ -570,22 +579,21 @@ namespace Restaurant.Model
                     {
                         cmd2.Parameters.AddWithValue("@ID", DetailID);
                     }
-                    cmd2.Parameters.AddWithValue("@MainID", MainID);
-                    cmd2.Parameters.AddWithValue("@ProID", Convert.ToInt32(row.Cells["DvgProID"].Value));
-                    cmd2.Parameters.AddWithValue("@Price", Convert.ToDouble(row.Cells["DvgPrice"].Value));
+                    cmd2.Parameters.Add("@MainID", OleDbType.Integer).Value = MainID;
+                    cmd2.Parameters.Add("@ProID", OleDbType.Integer).Value = Convert.ToInt32(row.Cells["DvgProID"].Value);
 
                     int qty;
                     if (int.TryParse(row.Cells["DvgQty"].Value?.ToString(), out qty))
                     {
-                        cmd2.Parameters.AddWithValue("@Qty", qty);
+                        cmd2.Parameters.Add("@Qty", OleDbType.Integer).Value = qty;
                     }
                     else
                     {
                         qty = 0; // or any default value you prefer
-                        cmd2.Parameters.AddWithValue("@Qty", qty);
+                        cmd2.Parameters.Add("@Qty", OleDbType.Integer).Value = qty;
                     }
-
-                    cmd2.Parameters.AddWithValue("@Amount", Convert.ToDouble(row.Cells["DvgAmount"].Value));
+                    cmd2.Parameters.Add("@Price", OleDbType.Currency).Value = Convert.ToDecimal(row.Cells["DvgPrice"].Value);
+                    cmd2.Parameters.Add("@Amount", OleDbType.Currency).Value = Convert.ToDecimal(row.Cells["DvgAmount"].Value);
 
                     try
                     {
@@ -1087,48 +1095,44 @@ namespace Restaurant.Model
 
             if (MainID == 0) // Insert
             {
-                qry1 = @"INSERT INTO TblMain (Date, Time, TableName, WaiterName, Status, OrderType, Total, Recieved, Change, DriverID, CustName, CustPhone)
-                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone);";
+                qry1 = @"INSERT INTO TblMain ([Date], [Time], TableName, WaiterName, [Status], OrderType, Total, Recieved, [Change], DriverID, CustName, CustPhone)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             }
             else // Update
             {
                 qry1 = @"UPDATE TblMain
-                 SET Status = @Status,OrderType = @OrderType, Total = @Total,Recieved = @Recieved, Change = @Change
-                 WHERE MainID = @ID;";
+                 SET [Status] = ?, OrderType = ?, Total = ?, Recieved = ?, [Change] = ?
+                 WHERE MainID = ?";
 
 
             }
 
             OleDbCommand cmd = new OleDbCommand(qry1, MainClass.con);
 
-            if (MainID != 0)
+            if (MainID == 0)
             {
-                cmd.Parameters.AddWithValue("@ID", MainID);
+                cmd.Parameters.Add("@Date", OleDbType.Date).Value = DateTime.Now.Date;
+                cmd.Parameters.Add("@Time", OleDbType.VarWChar, 30).Value = DateTime.Now.ToShortTimeString();
+                cmd.Parameters.Add("@TableName", OleDbType.VarWChar, 100).Value = lblTable.Text;
+                cmd.Parameters.Add("@WaiterName", OleDbType.VarWChar, 150).Value = lblWaiter.Text;
+                cmd.Parameters.Add("@Status", OleDbType.VarWChar, 50).Value = "Complete";
+                cmd.Parameters.Add("@OrderType", OleDbType.VarWChar, 50).Value = OrderType;
+                cmd.Parameters.Add("@Total", OleDbType.Currency).Value = Convert.ToDecimal(lbltotal.Text);
+                cmd.Parameters.Add("@Recieved", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@Change", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@DriverID", OleDbType.Integer).Value = DriverID;
+                cmd.Parameters.Add("@CustName", OleDbType.VarWChar, 150).Value = CustomerName ?? "";
+                cmd.Parameters.Add("@CustPhone", OleDbType.VarWChar, 50).Value = CustomerPhone ?? "";
             }
-            cmd.Parameters.AddWithValue("@Date", DateTime.Now.Date);
-            cmd.Parameters.AddWithValue("@Time", DateTime.Now.ToShortTimeString());
-            cmd.Parameters.AddWithValue("@TableName", lblTable.Text);
-            cmd.Parameters.AddWithValue("@WaiterName", lblWaiter.Text);
-            cmd.Parameters.AddWithValue("@Status", "Complete");
-            //if (OrderType == "Take Away")
-            //{
-            //    cmd.Parameters.AddWithValue("@Status", "Paid");
-
-
-            //}
-            //else
-            //{
-            //    cmd.Parameters.AddWithValue("@Status", "Complete");
-            //}
-
-
-            cmd.Parameters.AddWithValue("@OrderType", OrderType); // Make sure OrderType is provided and not null
-            cmd.Parameters.AddWithValue("@Total", Convert.ToDouble(lbltotal.Text));
-            cmd.Parameters.AddWithValue("@Recieved", Convert.ToDouble(0));
-            cmd.Parameters.AddWithValue("@Change", Convert.ToDouble(0));
-            cmd.Parameters.AddWithValue("@DriverID", DriverID);
-            cmd.Parameters.AddWithValue("@CustName", CustomerName);
-            cmd.Parameters.AddWithValue("@CustPhone", CustomerPhone);
+            else
+            {
+                cmd.Parameters.Add("@Status", OleDbType.VarWChar, 50).Value = "Complete";
+                cmd.Parameters.Add("@OrderType", OleDbType.VarWChar, 50).Value = OrderType;
+                cmd.Parameters.Add("@Total", OleDbType.Currency).Value = Convert.ToDecimal(lbltotal.Text);
+                cmd.Parameters.Add("@Recieved", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@Change", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@ID", OleDbType.Integer).Value = MainID;
+            }
 
             if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }
             if (MainID == 0) { cmd.ExecuteNonQuery(); MainID = MainClass.GetLastIdentity(); } else { cmd.ExecuteNonQuery(); }
@@ -1179,8 +1183,8 @@ namespace Restaurant.Model
 
                 if (DetailID == 0)
                 {
-                    qry2 = @"INSERT INTO TblDetail (MainID, ProID, Qty, Price, Amount) 
-                  VALUES (@MainID, @ProID, @Qty, @Price, @Amount)";
+                    qry2 = @"INSERT INTO TblDetail (MainID, ProID, Qty, Price, Amount)
+                  VALUES (?, ?, ?, ?, ?)";
                 }
                 //else
                 //{
@@ -1195,22 +1199,21 @@ namespace Restaurant.Model
                     {
                         cmd2.Parameters.AddWithValue("@ID", DetailID);
                     }
-                    cmd2.Parameters.AddWithValue("@MainID", MainID);
-                    cmd2.Parameters.AddWithValue("@ProID", Convert.ToInt32(row.Cells["DvgProID"].Value));
-                    cmd2.Parameters.AddWithValue("@Price", Convert.ToDouble(row.Cells["DvgPrice"].Value));
+                    cmd2.Parameters.Add("@MainID", OleDbType.Integer).Value = MainID;
+                    cmd2.Parameters.Add("@ProID", OleDbType.Integer).Value = Convert.ToInt32(row.Cells["DvgProID"].Value);
 
                     int qty;
                     if (int.TryParse(row.Cells["DvgQty"].Value?.ToString(), out qty))
                     {
-                        cmd2.Parameters.AddWithValue("@Qty", qty);
+                        cmd2.Parameters.Add("@Qty", OleDbType.Integer).Value = qty;
                     }
                     else
                     {
                         qty = 0; // or any default value you prefer
-                        cmd2.Parameters.AddWithValue("@Qty", qty);
+                        cmd2.Parameters.Add("@Qty", OleDbType.Integer).Value = qty;
                     }
-
-                    cmd2.Parameters.AddWithValue("@Amount", Convert.ToDouble(row.Cells["DvgAmount"].Value));
+                    cmd2.Parameters.Add("@Price", OleDbType.Currency).Value = Convert.ToDecimal(row.Cells["DvgPrice"].Value);
+                    cmd2.Parameters.Add("@Amount", OleDbType.Currency).Value = Convert.ToDecimal(row.Cells["DvgAmount"].Value);
 
                     try
                     {
@@ -1453,34 +1456,41 @@ namespace Restaurant.Model
 
             if (MainID == 0) // Insert
             {
-                qry1 = @"INSERT INTO TblMain (Date, Time, TableName, WaiterName, Status, OrderType, Total, Recieved, Change)
-                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change,@DriverID,@CustName,@CustPhone);";
+                qry1 = @"INSERT INTO TblMain ([Date], [Time], TableName, WaiterName, [Status], OrderType, Total, Recieved, [Change], DriverID, CustName, CustPhone)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             }
             else // Update
             {
                 qry1 = @"UPDATE TblMain
-                 SET Status = @Status, Total = @Total, Recieved = @Recieved, Change = @Change
-                 WHERE MainID = @ID;";
+                 SET [Status] = ?, Total = ?, Recieved = ?, [Change] = ?
+                 WHERE MainID = ?";
             }
 
             OleDbCommand cmd = new OleDbCommand(qry1, MainClass.con);
 
-            if (MainID != 0)
+            if (MainID == 0)
             {
-                cmd.Parameters.AddWithValue("@ID", MainID);
+                cmd.Parameters.Add("@Date", OleDbType.Date).Value = DateTime.Now.Date;
+                cmd.Parameters.Add("@Time", OleDbType.VarWChar, 30).Value = DateTime.Now.ToShortTimeString();
+                cmd.Parameters.Add("@TableName", OleDbType.VarWChar, 100).Value = lblTable.Text;
+                cmd.Parameters.Add("@WaiterName", OleDbType.VarWChar, 150).Value = lblWaiter.Text;
+                cmd.Parameters.Add("@Status", OleDbType.VarWChar, 50).Value = "Hold";
+                cmd.Parameters.Add("@OrderType", OleDbType.VarWChar, 50).Value = OrderType;
+                cmd.Parameters.Add("@Total", OleDbType.Currency).Value = Convert.ToDecimal(lbltotal.Text);
+                cmd.Parameters.Add("@Recieved", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@Change", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@DriverID", OleDbType.Integer).Value = DriverID;
+                cmd.Parameters.Add("@CustName", OleDbType.VarWChar, 150).Value = CustomerName ?? "";
+                cmd.Parameters.Add("@CustPhone", OleDbType.VarWChar, 50).Value = CustomerPhone ?? "";
             }
-            cmd.Parameters.AddWithValue("@Date", DateTime.Now.Date);
-            cmd.Parameters.AddWithValue("@Time", DateTime.Now.ToShortTimeString());
-            cmd.Parameters.AddWithValue("@TableName", lblTable.Text);
-            cmd.Parameters.AddWithValue("@WaiterName", lblWaiter.Text);
-            cmd.Parameters.AddWithValue("@Status", "Hold");
-            cmd.Parameters.AddWithValue("@OrderType", OrderType); // Make sure OrderType is provided and not null
-            cmd.Parameters.AddWithValue("@Total", Convert.ToDouble(lbltotal.Text));
-            cmd.Parameters.AddWithValue("@Recieved", Convert.ToDouble(0));
-            cmd.Parameters.AddWithValue("@Change", Convert.ToDouble(0));
-            cmd.Parameters.AddWithValue("@DriverID", DriverID);
-            cmd.Parameters.AddWithValue("@CustName", CustomerName);
-            cmd.Parameters.AddWithValue("@CustPhone", CustomerPhone);
+            else
+            {
+                cmd.Parameters.Add("@Status", OleDbType.VarWChar, 50).Value = "Hold";
+                cmd.Parameters.Add("@Total", OleDbType.Currency).Value = Convert.ToDecimal(lbltotal.Text);
+                cmd.Parameters.Add("@Recieved", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@Change", OleDbType.Currency).Value = 0m;
+                cmd.Parameters.Add("@ID", OleDbType.Integer).Value = MainID;
+            }
 
             if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }
             if (MainID == 0) { cmd.ExecuteNonQuery(); MainID = MainClass.GetLastIdentity(); } else { cmd.ExecuteNonQuery(); }
@@ -1490,39 +1500,43 @@ namespace Restaurant.Model
             {
                 DetailID = Convert.ToInt32(row.Cells["dvgid"].Value);
 
-                if (DetailID != 0)
+                if (DetailID == 0)
                 {
-                    qry2 = @"INSERT INTO TblDetail (MainID, ProID, Qty, Price, Amount) 
-                          VALUES (@MainID, @ProID, @Qty, @Price, @Amount)";
+                    qry2 = @"INSERT INTO TblDetail (MainID, ProID, Qty, Price, Amount)
+                          VALUES (?, ?, ?, ?, ?)";
                 }
                 else
                 {
-                    qry2 = @"UPDATE TblDetail 
-                          SET ProID = @ProID, Qty = @Qty, Price = @Price, Amount = @Amount
-                          WHERE DetailID = @ID";
+                    qry2 = @"UPDATE TblDetail
+                          SET ProID = ?, Qty = ?, Price = ?, Amount = ?
+                          WHERE DetailID = ?";
                 }
 
                 OleDbCommand cmd2 = new OleDbCommand(qry2, MainClass.con);
-                if (DetailID != 0)
+                if (DetailID == 0)
                 {
-                    cmd2.Parameters.AddWithValue("@ID", DetailID);
+                    cmd2.Parameters.Add("@MainID", OleDbType.Integer).Value = MainID;
+                    cmd2.Parameters.Add("@ProID", OleDbType.Integer).Value = Convert.ToInt32(row.Cells["DvgProID"].Value);
                 }
-                cmd2.Parameters.AddWithValue("@MainID", MainID);
-                cmd2.Parameters.AddWithValue("@ProID", Convert.ToInt32(row.Cells["DvgProID"].Value));
-                cmd2.Parameters.AddWithValue("@Price", Convert.ToDouble(row.Cells["DvgPrice"].Value));
+                else
+                {
+                    cmd2.Parameters.Add("@ProID", OleDbType.Integer).Value = Convert.ToInt32(row.Cells["DvgProID"].Value);
+                }
 
                 int qty;
                 if (int.TryParse(row.Cells["DvgQty"].Value?.ToString(), out qty))
                 {
-                    cmd2.Parameters.AddWithValue("@Qty", qty);
+                    cmd2.Parameters.Add("@Qty", OleDbType.Integer).Value = qty;
                 }
                 else
                 {
                     qty = 0; // or any default value you prefer
-                    cmd2.Parameters.AddWithValue("@Qty", qty);
+                    cmd2.Parameters.Add("@Qty", OleDbType.Integer).Value = qty;
                 }
-
-                cmd2.Parameters.AddWithValue("@Amount", Convert.ToDouble(row.Cells["DvgAmount"].Value));
+                cmd2.Parameters.Add("@Price", OleDbType.Currency).Value = Convert.ToDecimal(row.Cells["DvgPrice"].Value);
+                cmd2.Parameters.Add("@Amount", OleDbType.Currency).Value = Convert.ToDecimal(row.Cells["DvgAmount"].Value);
+                if (DetailID != 0)
+                    cmd2.Parameters.Add("@ID", OleDbType.Integer).Value = DetailID;
 
 
                 if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }

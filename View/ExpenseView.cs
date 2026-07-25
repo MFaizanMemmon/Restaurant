@@ -27,7 +27,7 @@ namespace Restaurant.View
         public void GetData()
         {
             // Define the query to select all data from TblExpence
-            string qry = "SELECT ExpID, Format([ExpDate], 'dd mmm yyyy') AS ExpDate, ExpHead, PaymentType, Amount, Notes FROM TblExpence WHERE ExpHead LIKE @ExpHead";
+            string qry = "SELECT ExpID, ExpDate, ExpHead, PaymentType, Amount, Notes FROM TblExpence WHERE ExpHead LIKE ?";
 
             // Initialize OleDbConnection and OleDbCommand
           
@@ -52,7 +52,7 @@ namespace Restaurant.View
                         {
                             guna2DataGridView1.Rows.Add(
                                 dr["ExpID"].ToString(),       // Column 1
-                                dr["ExpDate"].ToString(),     // Column 3
+                                Convert.ToDateTime(dr["ExpDate"]).ToString("dd MMM yyyy"),
                                 dr["ExpHead"].ToString(),     // Column 4
                                 dr["PaymentType"].ToString(), // Column 5
                                 dr["Amount"].ToString(),      // Column 6

@@ -29,7 +29,7 @@ namespace Restaurant.View
         public void GetData()
         {
             // Define the query to select all data from TblExpence
-            string qry = "SELECT CashID, Format([DateTime], 'dd mmm yyyy') AS [DateTime], CashMode, Amount, Notes FROM TblCashIn WHERE CashMode LIKE @CashMode";
+            string qry = "SELECT CashID, [DateTime], CashMode, Amount, Notes FROM TblCashIn WHERE CashMode LIKE ?";
 
             // Initialize OleDbConnection and OleDbCommand
 
@@ -54,7 +54,7 @@ namespace Restaurant.View
                         {
                             guna2DataGridView1.Rows.Add(
                                 dr["CashID"].ToString(),       // Column 1
-                                dr["DateTime"].ToString(),     // Column 3
+                                Convert.ToDateTime(dr["DateTime"]).ToString("dd MMM yyyy"),
                                 dr["CashMode"].ToString(),     // Column 4
                                 dr["Amount"].ToString(),      // Column 6
                                 dr["Notes"].ToString()

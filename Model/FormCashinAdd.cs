@@ -21,53 +21,36 @@ namespace Restaurant.Model
         public int id = 0;
         public override void btnSave_Click(object sender, EventArgs e)
         {
-            if (txtAmount.Text == string.Empty && txtNotes.Text == string.Empty)
+            if (!decimal.TryParse(txtAmount.Text, out decimal amount))
             {
-                MessageBox.Show("Please enter proper data");
+                MessageBox.Show("Please enter a valid amount.");
+                txtAmount.Focus();
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(cbMode.Text))
+            {
+                MessageBox.Show("Please select a cash mode.");
+                cbMode.Focus();
                 return;
             }
 
-            string qry = "";
-
-            if (id == 0)
-            {
-                qry = "INSERT INTO TblCashIn (DateTime, CashMode, Amount, Notes, createBy, ModifyBy) " +
-                      "VALUES (@DateTime, @CashMode, @Amount, @Notes, @createBy, @ModifyBy)";
-            }
-            else
-            {
-                qry = "UPDATE TblCashIn SET DateTime = @DateTime, CashMode = @CashMode ,Amount = @Amount, Notes = @Notes, createBy = @createBy, ModifyBy = @ModifyBy WHERE CashID = @id";
-            }
+            string qry = id == 0
+                ? "INSERT INTO TblCashIn ([DateTime], CashMode, Amount, Notes, createBy, ModifyBy) VALUES (?, ?, ?, ?, ?, ?)"
+                : "UPDATE TblCashIn SET [DateTime] = ?, CashMode = ?, Amount = ?, Notes = ?, createBy = ?, ModifyBy = ? WHERE CashID = ?";
 
             using (OleDbConnection conn = new OleDbConnection(MainClass.con_string))
             using (OleDbCommand cmd = new OleDbCommand(qry, conn))
             {
-                // Convert text input to appropriate types
-                DateTime expDate;
-                if (!DateTime.TryParse(CashDateTime.Value.ToShortDateString(), out expDate))
-                {
-                    MessageBox.Show("Invalid date format.");
-                    return;
-                }
-
-                decimal amount;
-                if (!decimal.TryParse(txtAmount.Text, out amount))
-                {
-                    MessageBox.Show("Invalid amount format.");
-                    return;
-                }
-
-                // Add parameters
-                cmd.Parameters.AddWithValue("@DateTime",DateTime.Now);
-                cmd.Parameters.AddWithValue("@CashMode", cbMode.Text);
-                cmd.Parameters.AddWithValue("@Amount", amount);
-                cmd.Parameters.AddWithValue("@Notes", txtNotes.Text);
-                cmd.Parameters.AddWithValue("@createBy", DateTime.Now); // Replace with actual user or appropriate value
-                cmd.Parameters.AddWithValue("@ModifyBy", DateTime.Now); // Replace with actual user or appropriate value
+                cmd.Parameters.Add("@DateTime", OleDbType.Date).Value = CashDateTime.Value;
+                cmd.Parameters.Add("@CashMode", OleDbType.VarWChar, 100).Value = cbMode.Text;
+                cmd.Parameters.Add("@Amount", OleDbType.Currency).Value = amount;
+                cmd.Parameters.Add("@Notes", OleDbType.LongVarWChar).Value = txtNotes.Text;
+                cmd.Parameters.Add("@createBy", OleDbType.VarWChar, 100).Value = MainClass.USER ?? "";
+                cmd.Parameters.Add("@ModifyBy", OleDbType.VarWChar, 100).Value = MainClass.USER ?? "";
 
                 if (id != 0)
                 {
-                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.Add("@id", OleDbType.Integer).Value = id;
                 }
 
                 try
@@ -124,14 +107,16 @@ namespace Restaurant.Model
         private void ForUpdateLoadData()
         {
             // Replace with parameterized query to prevent SQL injection
-            string qry = @"SELECT DateTime, CashMode, Amount, Notes 
+            if (id == 0) return;
+            string qry = @"SELECT [DateTime], CashMode, Amount, Notes
                    FROM TblCashIn 
-                   WHERE CashID = @CashID";
+                   WHERE CashID = ?";
 
-            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
+            using (var connection = new OleDbConnection(MainClass.con_string))
+            using (OleDbCommand cmd = new OleDbCommand(qry, connection))
             {
                 // Add parameter to the query
-                cmd.Parameters.AddWithValue("@CashID", id);
+                cmd.Parameters.Add("@CashID", OleDbType.Integer).Value = id;
 
                 OleDbDataAdapter da = new OleDbDataAdapter(cmd);
                 DataTable dt = new DataTable();
