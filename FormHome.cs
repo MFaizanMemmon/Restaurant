@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -32,7 +32,7 @@ namespace Restaurant
             int rowCount = 0;
 
             string query = "SELECT COUNT(*) FROM Users";
-            SqlCommand cmd = new SqlCommand(query, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(query, MainClass.con);
 
             MainClass.con.Open();
             rowCount = (int)cmd.ExecuteScalar();
@@ -49,7 +49,7 @@ namespace Restaurant
             int rowCount = 0;
 
             string query = "SELECT COUNT(*) FROM Staff";
-            SqlCommand cmd = new SqlCommand(query, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(query, MainClass.con);
 
             MainClass.con.Open();
             rowCount = (int)cmd.ExecuteScalar();
@@ -66,7 +66,7 @@ namespace Restaurant
             int rowCount = 0;
 
             string query = "SELECT COUNT(*) FROM Category";
-            SqlCommand cmd = new SqlCommand(query, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(query, MainClass.con);
 
             MainClass.con.Open();
             rowCount = (int)cmd.ExecuteScalar();
@@ -84,7 +84,7 @@ namespace Restaurant
             int rowCount = 0;
 
             string query = "SELECT COUNT(*) FROM Product";
-            SqlCommand cmd = new SqlCommand(query, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(query, MainClass.con);
 
             MainClass.con.Open();
             rowCount = (int)cmd.ExecuteScalar();
@@ -99,7 +99,7 @@ namespace Restaurant
             string qry = "SELECT SUM(TotalAmount) AS Amount FROM (SELECT SUM(Total) AS TotalAmount FROM tblMain where Status = 'Paid'  UNION ALL SELECT -SUM(Amount) AS TotalAmount FROM TblExpence UNION ALL SELECT SUM(Total) AS TotalAmount FROM tblMainReturn UNION ALL SELECT SUM(Amount) AS TotalAmount FROM tblCashIN) AS CombinedTotals;";
 
             // Initialize SQL command
-            using (SqlCommand cmd = new SqlCommand(qry, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
             {
                 try
                 {

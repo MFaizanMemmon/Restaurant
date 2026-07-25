@@ -1,10 +1,10 @@
-﻿using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.CrystalReports.Engine;
 using Restaurant.Reportss;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -85,10 +85,10 @@ namespace Restaurant
                 ";
 
 
-            // Initialize SqlConnection and SqlCommand
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+            // Initialize OleDbConnection and OleDbCommand
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand(query, con);
+                OleDbCommand cmd = new OleDbCommand(query, con);
                 //cmd.Parameters.AddWithValue("@StartDateParam", dateTimePicker1.Value.Date);
                 //cmd.Parameters.AddWithValue("@EndDateParam", dateTimePicker2.Value.Date);
 
@@ -97,7 +97,7 @@ namespace Restaurant
 
                 // Create DataSet and fill it
                 DataSet dataSet = new DataSet();
-                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
                 adapter.Fill(dataSet, "CashLedger");
 
                 // Close the connection

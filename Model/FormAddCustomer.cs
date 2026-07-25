@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -29,7 +29,7 @@ namespace Restaurant.Model
                 cbDriver.Visible = false;
             }
 
-            string qry = "select StaffID 'id', StaffName 'name' from Staff where StaffRole = 'Driver' ";
+            string qry = "select StaffID AS id, StaffName AS [name] from Staff where StaffRole = 'Driver' ";
             MainClass.CBFill(qry, cbDriver);
 
             if (MainID >0)

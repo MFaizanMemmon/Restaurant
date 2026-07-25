@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -34,8 +34,8 @@ namespace Restaurant.Model
         {
             string qry = "SELECT DISTINCT ExpenseHead FROM TblExpenseHead"; // Ensure DISTINCT if needed
 
-            using (SqlConnection connection = new SqlConnection(MainClass.con_string))
-            using (SqlDataAdapter adapter = new SqlDataAdapter(qry, connection))
+            using (OleDbConnection connection = new OleDbConnection(MainClass.con_string))
+            using (OleDbDataAdapter adapter = new OleDbDataAdapter(qry, connection))
             {
                 DataTable dataTable = new DataTable();
 
@@ -85,8 +85,8 @@ namespace Restaurant.Model
                       "Amount = @Amount, Notes = @Notes, createdBy = @createdBy, ModifyBy = @ModifyBy WHERE ExpID = @id";
             }
 
-            using (SqlConnection conn = new SqlConnection(MainClass.con_string))
-            using (SqlCommand cmd = new SqlCommand(qry, conn))
+            using (OleDbConnection conn = new OleDbConnection(MainClass.con_string))
+            using (OleDbCommand cmd = new OleDbCommand(qry, conn))
             {
                 // Convert text input to appropriate types
                 DateTime expDate;
@@ -176,12 +176,12 @@ namespace Restaurant.Model
                    FROM TblExpence 
                    WHERE ExpID = @ExpID";
 
-            using (SqlCommand cmd = new SqlCommand(qry, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
             {
                 // Add parameter to the query
                 cmd.Parameters.AddWithValue("@ExpID", id);
 
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                OleDbDataAdapter da = new OleDbDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 

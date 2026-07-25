@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -33,8 +33,8 @@ namespace Restaurant.Model
                 qry = "UPDATE TblExpenseHead SET ExpenseHead = @ExpenseHead WHERE ExpenseID = @id";
             }
 
-            using (SqlConnection conn = new SqlConnection(MainClass.con_string))
-            using (SqlCommand cmd = new SqlCommand(qry, conn))
+            using (OleDbConnection conn = new OleDbConnection(MainClass.con_string))
+            using (OleDbCommand cmd = new OleDbCommand(qry, conn))
             {
                 // Add parameters
                 cmd.Parameters.AddWithValue("@ExpenseHead", txtExpenseHead.Text);
@@ -89,15 +89,15 @@ namespace Restaurant.Model
 
             public void GetData()
         {
-            SqlConnection conn = new SqlConnection(MainClass.con_string);
+            OleDbConnection conn = new OleDbConnection(MainClass.con_string);
             string qry = "SELECT * FROM TblExpenseHead WHERE ExpenseHead LIKE '%" + txtSearch.Text + "%'";
 
-            SqlCommand cmd = new SqlCommand(qry, conn); // Initialize SqlCommand
+            OleDbCommand cmd = new OleDbCommand(qry, conn); // Initialize OleDbCommand
             conn.Open();
 
             cmd.Parameters.AddWithValue("@ExpenseHead", "%" + txtSearch.Text + "%");
 
-            SqlDataReader dr = cmd.ExecuteReader(); // Execute query
+            OleDbDataReader dr = cmd.ExecuteReader(); // Execute query
 
             datagridview1.Rows.Clear(); // Clear previous data
 
@@ -109,7 +109,7 @@ namespace Restaurant.Model
                 );
             }
 
-            dr.Close(); // Close SqlDataReader
+            dr.Close(); // Close OleDbDataReader
             conn.Close();
         }
 

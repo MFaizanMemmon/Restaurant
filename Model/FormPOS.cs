@@ -1,4 +1,4 @@
-﻿using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.CrystalReports.Engine;
 using Restaurant.View;
 using System;
 using System.Collections;
@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
@@ -54,9 +54,9 @@ namespace Restaurant.Model
             DataTable dt = new DataTable();
 
             // Use asynchronous data retrieval
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand(qry, con))
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
+            using (OleDbCommand cmd = new OleDbCommand(qry, con))
+            using (OleDbDataAdapter da = new OleDbDataAdapter(cmd))
             {
                 await con.OpenAsync();
                 await Task.Run(() => da.Fill(dt));
@@ -254,8 +254,8 @@ namespace Restaurant.Model
                            "FROM Product " +
                            "INNER JOIN Category ON Product.CategoryID = Category.CategoryID Order by ProductName asc";
 
-            using (SqlCommand cmd = new SqlCommand(query, MainClass.con))
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (OleDbCommand cmd = new OleDbCommand(query, MainClass.con))
+            using (OleDbDataAdapter da = new OleDbDataAdapter(cmd))
             {
                 DataTable dt = new DataTable();
                 await Task.Run(() => da.Fill(dt)); // Fill the DataTable asynchronously
@@ -496,8 +496,7 @@ namespace Restaurant.Model
             if (MainID == 0) // Insert
             {
                 qry1 = @"INSERT INTO TblMain (Date, Time, TableName, WaiterName, Status, OrderType, Total, Recieved, Change, DriverID, CustName, CustPhone)
-                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone);
-                 SELECT SCOPE_IDENTITY();";
+                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone);";
             }
             else // Update
             {
@@ -510,7 +509,7 @@ namespace Restaurant.Model
 
             }
 
-            SqlCommand cmd = new SqlCommand(qry1, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(qry1, MainClass.con);
 
             if (MainID != 0)
             {
@@ -532,7 +531,7 @@ namespace Restaurant.Model
             cmd.Parameters.AddWithValue("@IsOrderPrint", 0);
 
             if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }
-            if (MainID == 0) { MainID = Convert.ToInt32(cmd.ExecuteScalar()); } else { cmd.ExecuteNonQuery(); }
+            if (MainID == 0) { cmd.ExecuteNonQuery(); MainID = MainClass.GetLastIdentity(); } else { cmd.ExecuteNonQuery(); }
             if (MainClass.con.State == ConnectionState.Open) { MainClass.con.Close(); }
 
             bool operationSuccessful = true;
@@ -541,7 +540,7 @@ namespace Restaurant.Model
             string deleteQuery = "DELETE FROM TblDetail WHERE MainID = @MainID";
 
             // First, delete the existing records
-            using (SqlCommand deleteCmd = new SqlCommand(deleteQuery, MainClass.con))
+            using (OleDbCommand deleteCmd = new OleDbCommand(deleteQuery, MainClass.con))
             {
                 deleteCmd.Parameters.AddWithValue("@MainID", MainID);
 
@@ -584,7 +583,7 @@ namespace Restaurant.Model
                 //  WHERE DetailID = @ID";
                 //}
 
-                using (SqlCommand cmd2 = new SqlCommand(qry2, MainClass.con))
+                using (OleDbCommand cmd2 = new OleDbCommand(qry2, MainClass.con))
                 {
                     if (DetailID != 0)
                     {
@@ -680,11 +679,11 @@ namespace Restaurant.Model
             // Define the SQL query to count items by MainID
             string query = "SELECT COUNT(*) FROM tblDetail WHERE MainID = @MainID";
 
-            // Using SqlConnection to connect to the database
-            using (SqlConnection conn = new SqlConnection(MainClass.con_string))
+            // Using OleDbConnection to connect to the database
+            using (OleDbConnection conn = new OleDbConnection(MainClass.con_string))
             {
-                // Create a SqlCommand object with the query and connection
-                SqlCommand cmd = new SqlCommand(query, conn);
+                // Create a OleDbCommand object with the query and connection
+                OleDbCommand cmd = new OleDbCommand(query, conn);
 
                 // Add the MainID parameter to the command
                 cmd.Parameters.AddWithValue("@MainID", mainID);
@@ -720,9 +719,9 @@ namespace Restaurant.Model
                        AND TableName <> '' 
                        AND TableName = @TableName";
 
-            using (SqlCommand cmd = new SqlCommand(query, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(query, MainClass.con))
             {
-                cmd.Parameters.Add(new SqlParameter("@TableName", SqlDbType.VarChar)).Value = tableNameToValidate;
+                cmd.Parameters.Add(new OleDbParameter("@TableName", OleDbType.VarChar)).Value = tableNameToValidate;
 
                 try
                 {
@@ -751,10 +750,10 @@ namespace Restaurant.Model
             int maxCategoryId = 0;
 
             // Retrieve the maximum order count for the given mainId
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
             {
                 string maxCategoryQuery = "SELECT MAX(ordercount) FROM tblOrderLog WHERE mainid = @MainId";
-                using (SqlCommand cmd = new SqlCommand(maxCategoryQuery, con))
+                using (OleDbCommand cmd = new OleDbCommand(maxCategoryQuery, con))
                 {
                     cmd.Parameters.AddWithValue("@MainId", MainID);
                     con.Open();
@@ -784,7 +783,7 @@ namespace Restaurant.Model
                     ORDER BY logid DESC
                 ";
 
-                using (SqlCommand checkCmd = new SqlCommand(checkLogQuery, MainClass.con))
+                using (OleDbCommand checkCmd = new OleDbCommand(checkLogQuery, MainClass.con))
                 {
                     checkCmd.Parameters.AddWithValue("@MainID", MainID);
                     checkCmd.Parameters.AddWithValue("@ItemID", itemId);
@@ -794,7 +793,7 @@ namespace Restaurant.Model
                         if (MainClass.con.State == ConnectionState.Closed)
                             MainClass.con.Open();
 
-                        SqlDataReader reader = checkCmd.ExecuteReader();
+                        OleDbDataReader reader = checkCmd.ExecuteReader();
 
                         int lastQty = 0;
                         // int lastOrderCount = 0;
@@ -850,7 +849,7 @@ namespace Restaurant.Model
                 FROM tblOrderLog
                 WHERE mainid = @MainID AND isdeleted = 0";
 
-            using (SqlCommand deleteCheckCmd = new SqlCommand(deleteCheckQuery, MainClass.con))
+            using (OleDbCommand deleteCheckCmd = new OleDbCommand(deleteCheckQuery, MainClass.con))
             {
                 deleteCheckCmd.Parameters.AddWithValue("@MainID", MainID);
 
@@ -859,7 +858,7 @@ namespace Restaurant.Model
                     if (MainClass.con.State == ConnectionState.Closed)
                         MainClass.con.Open();
 
-                    SqlDataReader reader = deleteCheckCmd.ExecuteReader();
+                    OleDbDataReader reader = deleteCheckCmd.ExecuteReader();
 
                     List<int> existingItems = new List<int>();
                     Dictionary<int, int> existingQuantities = new Dictionary<int, int>();
@@ -919,7 +918,7 @@ namespace Restaurant.Model
                                SET isdeleted = 1 
                                WHERE mainid = @MainID AND itemid = @ItemID";
 
-            using (SqlCommand cmd = new SqlCommand(softDeleteQuery, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(softDeleteQuery, MainClass.con))
             {
                 cmd.Parameters.AddWithValue("@MainID", mainId);
                 cmd.Parameters.AddWithValue("@ItemID", itemId);
@@ -957,7 +956,7 @@ namespace Restaurant.Model
             string logQuery = @"INSERT INTO tblOrderLog (mainid, itemid, qty, ordercount, isdeleted)
                         VALUES (@MainID, @ItemID, @Qty, @OrderCount, @IsDeleted)";
 
-            using (SqlCommand cmd = new SqlCommand(logQuery, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(logQuery, MainClass.con))
             {
                 cmd.Parameters.AddWithValue("@MainID", mainId);
                 cmd.Parameters.AddWithValue("@ItemID", itemId);
@@ -1013,8 +1012,8 @@ namespace Restaurant.Model
         {
             string Qry2 = @"SELECT 0,d.DetailID,p.ProductID,p.ProductName,d.Qty,d.Price,d.Amount,m.OrderType,m.TableName,m.waiterName,m.CustName,CustPhone from TblMain m INNER JOIN TblDetail d ON m.MainID = d.MainID INNER JOIN Product p ON p.ProductID = d.ProID WHERE m.MainID = " + id + " ";
 
-            SqlCommand cmd = new SqlCommand(Qry2, MainClass.con);
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbCommand cmd = new OleDbCommand(Qry2, MainClass.con);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             DataTable dt = new DataTable();
             da.Fill(dt);
             OrderType = dt.Rows[0]["OrderType"].ToString();
@@ -1108,8 +1107,7 @@ namespace Restaurant.Model
             if (MainID == 0) // Insert
             {
                 qry1 = @"INSERT INTO TblMain (Date, Time, TableName, WaiterName, Status, OrderType, Total, Recieved, Change, DriverID, CustName, CustPhone)
-                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone);
-                 SELECT SCOPE_IDENTITY();";
+                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone);";
             }
             else // Update
             {
@@ -1120,7 +1118,7 @@ namespace Restaurant.Model
 
             }
 
-            SqlCommand cmd = new SqlCommand(qry1, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(qry1, MainClass.con);
 
             if (MainID != 0)
             {
@@ -1152,7 +1150,7 @@ namespace Restaurant.Model
             cmd.Parameters.AddWithValue("@CustPhone", CustomerPhone);
 
             if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }
-            if (MainID == 0) { MainID = Convert.ToInt32(cmd.ExecuteScalar()); } else { cmd.ExecuteNonQuery(); }
+            if (MainID == 0) { cmd.ExecuteNonQuery(); MainID = MainClass.GetLastIdentity(); } else { cmd.ExecuteNonQuery(); }
             if (MainClass.con.State == ConnectionState.Open) { MainClass.con.Close(); }
 
             //bool operationSuccessful = true;
@@ -1167,7 +1165,7 @@ namespace Restaurant.Model
             string deleteQuery = "DELETE FROM TblDetail WHERE MainID = @MainID";
 
             // First, delete the existing records
-            using (SqlCommand deleteCmd = new SqlCommand(deleteQuery, MainClass.con))
+            using (OleDbCommand deleteCmd = new OleDbCommand(deleteQuery, MainClass.con))
             {
                 deleteCmd.Parameters.AddWithValue("@MainID", MainID);
 
@@ -1210,7 +1208,7 @@ namespace Restaurant.Model
                 //  WHERE DetailID = @ID";
                 //}
 
-                using (SqlCommand cmd2 = new SqlCommand(qry2, MainClass.con))
+                using (OleDbCommand cmd2 = new OleDbCommand(qry2, MainClass.con))
                 {
                     if (DetailID != 0)
                     {
@@ -1286,13 +1284,13 @@ namespace Restaurant.Model
 
         private bool CheckIfPrinted(int id)
         {
-            string query = "SELECT IsNull(IsPrintUnPaid,0) FROM TblMain WHERE MainID = @ID";
+            string query = "SELECT IIF(IsNull(IsPrintUnPaid),0,IsPrintUnPaid) FROM TblMain WHERE MainID = @ID";
 
             try
             {
-                using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+                using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
+                    OleDbCommand cmd = new OleDbCommand(query, con);
                     cmd.Parameters.AddWithValue("@ID", id);
 
                     con.Open();
@@ -1318,9 +1316,9 @@ namespace Restaurant.Model
 
             try
             {
-                using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+                using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
+                    OleDbCommand cmd = new OleDbCommand(query, con);
                     cmd.Parameters.AddWithValue("@ID", mainId);
 
                     con.Open();
@@ -1339,10 +1337,10 @@ namespace Restaurant.Model
             int maxCategoryId = 0;
 
             // Retrieve the maximum order count for the given mainId
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
             {
                 string maxCategoryQuery = "SELECT MAX(ordercount) FROM tblOrderLog WHERE mainid = @MainId";
-                using (SqlCommand cmd = new SqlCommand(maxCategoryQuery, con))
+                using (OleDbCommand cmd = new OleDbCommand(maxCategoryQuery, con))
                 {
                     cmd.Parameters.AddWithValue("@MainId", mainId);
                     con.Open();
@@ -1360,7 +1358,7 @@ namespace Restaurant.Model
             string reportPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Reportss\crptOrderReports.rpt");
 
             // First Print: CategoryID = 8
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
             {
                 string query = @"
                             SELECT 
@@ -1390,14 +1388,14 @@ namespace Restaurant.Model
                 reportDocument.Load(reportPath);
 
                 // Print for CategoryID = 8
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (OleDbCommand cmd = new OleDbCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@InvoiceId", mainId);
                     cmd.Parameters.AddWithValue("@CategoryId", 8);
                     cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
 
                     var billDataSet = new DSBill();
-                    var adapter = new SqlDataAdapter(cmd);
+                    var adapter = new OleDbDataAdapter(cmd);
                     adapter.Fill(billDataSet, "BillDT");
 
                     // Check if data exists in the DataTable before printing
@@ -1423,14 +1421,14 @@ namespace Restaurant.Model
                 }
 
                 // Print for CategoryID != 8
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (OleDbCommand cmd = new OleDbCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@InvoiceId", mainId);
                     cmd.Parameters.AddWithValue("@CategoryId", DBNull.Value);  // Null condition for CategoryID != 8
                     cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
 
                     var billDataSet = new DSBill();
-                    var adapter = new SqlDataAdapter(cmd);
+                    var adapter = new OleDbDataAdapter(cmd);
                     adapter.Fill(billDataSet, "BillDT");
 
                     // Check if data exists in the DataTable before printing
@@ -1475,8 +1473,7 @@ namespace Restaurant.Model
             if (MainID == 0) // Insert
             {
                 qry1 = @"INSERT INTO TblMain (Date, Time, TableName, WaiterName, Status, OrderType, Total, Recieved, Change)
-                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change,@DriverID,@CustName,@CustPhone);
-                 SELECT SCOPE_IDENTITY();";
+                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change,@DriverID,@CustName,@CustPhone);";
             }
             else // Update
             {
@@ -1485,7 +1482,7 @@ namespace Restaurant.Model
                  WHERE MainID = @ID;";
             }
 
-            SqlCommand cmd = new SqlCommand(qry1, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(qry1, MainClass.con);
 
             if (MainID != 0)
             {
@@ -1505,7 +1502,7 @@ namespace Restaurant.Model
             cmd.Parameters.AddWithValue("@CustPhone", CustomerPhone);
 
             if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }
-            if (MainID == 0) { MainID = Convert.ToInt32(cmd.ExecuteScalar()); } else { cmd.ExecuteNonQuery(); }
+            if (MainID == 0) { cmd.ExecuteNonQuery(); MainID = MainClass.GetLastIdentity(); } else { cmd.ExecuteNonQuery(); }
             if (MainClass.con.State == ConnectionState.Open) { MainClass.con.Close(); }
 
             foreach (DataGridViewRow row in guna2DataGridView1.Rows)
@@ -1524,7 +1521,7 @@ namespace Restaurant.Model
                           WHERE DetailID = @ID";
                 }
 
-                SqlCommand cmd2 = new SqlCommand(qry2, MainClass.con);
+                OleDbCommand cmd2 = new OleDbCommand(qry2, MainClass.con);
                 if (DetailID != 0)
                 {
                     cmd2.Parameters.AddWithValue("@ID", DetailID);

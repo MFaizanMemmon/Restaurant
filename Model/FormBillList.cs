@@ -1,10 +1,10 @@
-﻿using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.CrystalReports.Engine;
 using Restaurant.Reportss;
 using Restaurant.View;
 using System;
 using System.Collections;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
@@ -212,10 +212,10 @@ namespace Restaurant.Model
         {
             string query = "usp_GetBill"; // Stored procedure name
 
-            // Initialize SqlConnection and SqlCommand
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+            // Initialize OleDbConnection and OleDbCommand
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand(query, con);
+                OleDbCommand cmd = new OleDbCommand(query, con);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@InvoiceId", id); // Ensure id has a valid value
 
@@ -224,7 +224,7 @@ namespace Restaurant.Model
 
                 // Create DataSet and fill it
                 DSBill billDataSet = new DSBill(); // Ensure DSBill is your DataSet defined in the .xsd file
-                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
                 adapter.Fill(billDataSet, "BillDT");
 
                 // Close the connection
@@ -265,13 +265,13 @@ namespace Restaurant.Model
 
         private bool CheckIfPrinted(int id)
         {
-            string query = "SELECT IsNull(IsPrintUnPaid,0) FROM TblMain WHERE MainID = @ID";
+            string query = "SELECT IIF(IsNull(IsPrintUnPaid),0,IsPrintUnPaid) FROM TblMain WHERE MainID = @ID";
 
             try
             {
-                using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+                using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
+                    OleDbCommand cmd = new OleDbCommand(query, con);
                     cmd.Parameters.AddWithValue("@ID", id);
 
                     con.Open();
@@ -295,9 +295,9 @@ namespace Restaurant.Model
 
             try
             {
-                using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+                using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
+                    OleDbCommand cmd = new OleDbCommand(query, con);
                     cmd.Parameters.AddWithValue("@ID", id);
 
                     con.Open();
@@ -315,13 +315,13 @@ namespace Restaurant.Model
 
         private bool CheckIfPrintedOrder(int id)
         {
-            string query = "SELECT IsNull(IsOrderPrint,0) FROM TblMain WHERE MainID = @ID";
+            string query = "SELECT IIF(IsNull(IsOrderPrint),0,IsOrderPrint) FROM TblMain WHERE MainID = @ID";
 
             try
             {
-                using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+                using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
+                    OleDbCommand cmd = new OleDbCommand(query, con);
                     cmd.Parameters.AddWithValue("@ID", id);
 
                     con.Open();
@@ -345,9 +345,9 @@ namespace Restaurant.Model
 
             try
             {
-                using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+                using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
                 {
-                    SqlCommand cmd = new SqlCommand(query, con);
+                    OleDbCommand cmd = new OleDbCommand(query, con);
                     cmd.Parameters.AddWithValue("@ID", mainId);
 
                     con.Open();
@@ -366,10 +366,10 @@ namespace Restaurant.Model
             int maxCategoryId = 0;
 
             // Retrieve the maximum order count for the given mainId
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
             {
                 string maxCategoryQuery = "SELECT MAX(ordercount) FROM tblOrderLog WHERE mainid = @MainId";
-                using (SqlCommand cmd = new SqlCommand(maxCategoryQuery, con))
+                using (OleDbCommand cmd = new OleDbCommand(maxCategoryQuery, con))
                 {
                     cmd.Parameters.AddWithValue("@MainId", mainId);
                     con.Open();
@@ -387,7 +387,7 @@ namespace Restaurant.Model
             string reportPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Reportss\crptOrderReports.rpt");
 
             // First Print: CategoryID = 8
-            using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+            using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
             {
                 string query = @"
                             SELECT 
@@ -417,14 +417,14 @@ namespace Restaurant.Model
                 reportDocument.Load(reportPath);
 
                 // Print for CategoryID = 8
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (OleDbCommand cmd = new OleDbCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@InvoiceId", mainId);
                     cmd.Parameters.AddWithValue("@CategoryId", 8);
                     cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
 
                     var billDataSet = new DSBill();
-                    var adapter = new SqlDataAdapter(cmd);
+                    var adapter = new OleDbDataAdapter(cmd);
                     adapter.Fill(billDataSet, "BillDT");
 
                     // Check if data exists in the DataTable before printing
@@ -450,14 +450,14 @@ namespace Restaurant.Model
                 }
 
                 // Print for CategoryID != 8
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (OleDbCommand cmd = new OleDbCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@InvoiceId", mainId);
                     cmd.Parameters.AddWithValue("@CategoryId", DBNull.Value);  // Null condition for CategoryID != 8
                     cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
 
                     var billDataSet = new DSBill();
-                    var adapter = new SqlDataAdapter(cmd);
+                    var adapter = new OleDbDataAdapter(cmd);
                     adapter.Fill(billDataSet, "BillDT");
 
                     // Check if data exists in the DataTable before printing

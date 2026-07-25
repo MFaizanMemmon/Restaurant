@@ -1,4 +1,4 @@
-﻿namespace Restaurant.View
+namespace Restaurant.View
 {
     partial class FormStaffView
     {

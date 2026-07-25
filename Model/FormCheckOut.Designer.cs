@@ -1,4 +1,4 @@
-﻿
+
 namespace Restaurant.Model
 {
     partial class FormCheckOut

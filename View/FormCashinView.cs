@@ -1,10 +1,10 @@
-﻿using Restaurant.Model;
+using Restaurant.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -29,11 +29,11 @@ namespace Restaurant.View
         public void GetData()
         {
             // Define the query to select all data from TblExpence
-            string qry = "SELECT CashID, CONVERT(varchar, DateTime , 106) as 'DateTime', CashMode, Amount, Notes FROM TblCashIn WHERE CashMode LIKE @CashMode";
+            string qry = "SELECT CashID, Format([DateTime], 'dd mmm yyyy') AS [DateTime], CashMode, Amount, Notes FROM TblCashIn WHERE CashMode LIKE @CashMode";
 
-            // Initialize SqlConnection and SqlCommand
+            // Initialize OleDbConnection and OleDbCommand
 
-            using (SqlCommand cmd = new SqlCommand(qry, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
             {
                 // Add parameter with LIKE pattern
                 cmd.Parameters.AddWithValue("@CashMode", "%" + txtSearch.Text + "%");
@@ -44,7 +44,7 @@ namespace Restaurant.View
                     MainClass.con.Open();
 
                     // Execute the query
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (OleDbDataReader dr = cmd.ExecuteReader())
                     {
                         // Clear previous data
                         guna2DataGridView1.Rows.Clear();

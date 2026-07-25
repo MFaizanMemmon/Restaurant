@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -23,8 +23,8 @@ namespace Restaurant.Model
         {
             string qry = "SELECT DISTINCT ProductName, ProductPrice FROM Product"; // Include ProductPrice
 
-            using (SqlConnection connection = new SqlConnection(MainClass.con_string))
-            using (SqlDataAdapter adapter = new SqlDataAdapter(qry, connection))
+            using (OleDbConnection connection = new OleDbConnection(MainClass.con_string))
+            using (OleDbDataAdapter adapter = new OleDbDataAdapter(qry, connection))
             {
                 DataTable dataTable = new DataTable();
 
@@ -56,8 +56,8 @@ namespace Restaurant.Model
         {
             string qry = "SELECT DISTINCT Name FROM tblvender"; // Include ProductPrice
 
-            using (SqlConnection connection = new SqlConnection(MainClass.con_string))
-            using (SqlDataAdapter adapter = new SqlDataAdapter(qry, connection))
+            using (OleDbConnection connection = new OleDbConnection(MainClass.con_string))
+            using (OleDbDataAdapter adapter = new OleDbDataAdapter(qry, connection))
             {
                 DataTable dataTable = new DataTable();
 

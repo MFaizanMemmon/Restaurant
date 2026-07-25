@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -64,17 +64,17 @@ namespace Restaurant
         //private void AccessPage(int roleID)
         //{
         //    // Assuming you have a connection string defined elsewhere
-        //    using (SqlConnection con = new SqlConnection(MainClass.con_string))
+        //    using (OleDbConnection con = new OleDbConnection(MainClass.con_string))
         //    {
         //        string query = "SELECT Access FROM TblRoleAuther WHERE RoleID = @RoleID";
 
-        //        using (SqlCommand cmd = new SqlCommand(query, con))
+        //        using (OleDbCommand cmd = new OleDbCommand(query, con))
         //        {
         //            cmd.Parameters.AddWithValue("@RoleID", roleID);
 
         //            con.Open();
 
-        //            using (SqlDataReader reader = cmd.ExecuteReader())
+        //            using (OleDbDataReader reader = cmd.ExecuteReader())
         //            {
         //                // Clear any existing buttons
                         

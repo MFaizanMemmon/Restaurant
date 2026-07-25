@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -43,16 +43,16 @@ where
 
 ";
 
-            // Create a SqlCommand object
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con);
+            // Create a OleDbCommand object
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con);
 
             MainClass.con.Open();
 
             // Create a new DataSet (assuming you have a dataset defined in your project)
             DSDeleteBill ds = new DSDeleteBill();
 
-            // Use SqlDataAdapter to fill the dataset
-            SqlDataAdapter adpt = new SqlDataAdapter(cmd);
+            // Use OleDbDataAdapter to fill the dataset
+            OleDbDataAdapter adpt = new OleDbDataAdapter(cmd);
             adpt.Fill(ds, "DtDeleteOrSaleReport");
 
             MainClass.con.Close();

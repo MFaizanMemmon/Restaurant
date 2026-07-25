@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -10,22 +10,30 @@ using System.Windows.Forms;
 using Guna.UI2.WinForms;
 using System.Security.Cryptography;
 using System.Drawing;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Restaurant
 {
     internal class MainClass
     {
-        public static readonly string con_string = @"Data Source=DESKTOP-V6DB7O3\SQLEXPRESS;Initial Catalog=RM;Integrated Security=True";
-        public static SqlConnection con = new SqlConnection(con_string);
+        public static readonly string DatabasePath =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RM.accdb");
+        public static readonly string con_string =
+            @"Provider=Microsoft.ACE.OLEDB.16.0;Data Source=" + DatabasePath +
+            @";Persist Security Info=False;";
+        public static OleDbConnection con = new OleDbConnection(con_string);
 
         public static bool invaliduser(string user, string pass)
         {
             bool iavalid = false;
 
-            string query = "select * from Users where UName = '" + user + "' and UPass = '" + pass + "' ";
-            SqlCommand cmd = new SqlCommand(query, con);
+            string query = "select * from Users where UName = ? and UPass = ?";
+            OleDbCommand cmd = new OleDbCommand(query, con);
+            cmd.Parameters.AddWithValue("@user", user);
+            cmd.Parameters.AddWithValue("@pass", pass);
             DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             da.Fill(dt);
 
             if (dt.Rows.Count > 0)
@@ -62,13 +70,8 @@ namespace Restaurant
             int res = 0;
             try
             {
-                SqlCommand cmd = new SqlCommand(qry, con);
+                OleDbCommand cmd = CreateCommand(qry, ht);
                 cmd.CommandType = CommandType.Text;
-
-                foreach (DictionaryEntry item in ht)
-                {
-                    cmd.Parameters.AddWithValue(item.Key.ToString(), item.Value);
-                }
                 if (con.State == ConnectionState.Closed) { con.Open(); }
                 res = cmd.ExecuteNonQuery();
                 if (con.State == ConnectionState.Open) { con.Close(); }
@@ -81,6 +84,32 @@ namespace Restaurant
             return res;
         }
 
+        public static int GetLastIdentity()
+        {
+            using (OleDbCommand cmd = new OleDbCommand("SELECT @@IDENTITY", con))
+            {
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+        }
+
+        // ACE/OLE DB uses positional parameters. This preserves the order in
+        // which @parameters occur in the SQL instead of Hashtable iteration order.
+        private static OleDbCommand CreateCommand(string query, Hashtable values)
+        {
+            OleDbCommand cmd = new OleDbCommand(query, con);
+            MatchCollection names = Regex.Matches(query, @"@[A-Za-z_][A-Za-z0-9_]*");
+            HashSet<string> added = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (Match match in names)
+            {
+                string name = match.Value;
+                if (added.Contains(name)) continue;
+                object value = values[name] ?? values[name.TrimStart('@')];
+                cmd.Parameters.AddWithValue(name, value ?? DBNull.Value);
+                added.Add(name);
+            }
+            return cmd;
+        }
+
         // Loading Data in DataBase
 
         public static void LoadData(string qry, DataGridView gv, ListBox lb)
@@ -91,10 +120,10 @@ namespace Restaurant
 
             //try
             //{
-            //    SqlCommand cmd = new SqlCommand(qry, con);
+            //    OleDbCommand cmd = new OleDbCommand(qry, con);
             //    cmd.CommandType = CommandType.Text;
 
-            //    SqlDataAdapter da = new SqlDataAdapter(cmd);
+            //    OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             //    DataTable dt = new DataTable();
             //    da.Fill(dt);
 
@@ -114,10 +143,10 @@ namespace Restaurant
 
             try
             {
-                SqlCommand cmd = new SqlCommand(qry, con);
+                OleDbCommand cmd = new OleDbCommand(qry, con);
                 cmd.CommandType = CommandType.Text;
 
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                OleDbDataAdapter da = new OleDbDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
@@ -190,9 +219,9 @@ namespace Restaurant
 
         public static void CBFill(string qry, ComboBox cb)
         {
-            SqlCommand cmd = new SqlCommand(qry, con);
+            OleDbCommand cmd = new OleDbCommand(qry, con);
             cmd.CommandType = CommandType.Text;
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             DataTable dt = new DataTable();
             da.Fill(dt);
 

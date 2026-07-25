@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -42,7 +42,7 @@ namespace Restaurant.View
 
             string qry = "INSERT INTO TblRoleAuther (RoleID, Access) VALUES (@RoleID, @Access)";
 
-            using (SqlConnection connection = MainClass.con)
+            using (OleDbConnection connection = MainClass.con)
             {
                 connection.Open(); // Open the connection
 
@@ -50,7 +50,7 @@ namespace Restaurant.View
                 {
                     if (pair.CheckBox.Checked)
                     {
-                        using (SqlCommand cmd = new SqlCommand(qry, connection))
+                        using (OleDbCommand cmd = new OleDbCommand(qry, connection))
                         {
                             // Determine RoleID based on button
                             int roleId = GetRoleID(pair.Button);
@@ -95,7 +95,7 @@ namespace Restaurant.View
                {
             string qry = @"SELECT RoleID, RoleName FROM TblRole";
 
-            SqlDataAdapter adapter = new SqlDataAdapter(qry, MainClass.con);
+            OleDbDataAdapter adapter = new OleDbDataAdapter(qry, MainClass.con);
             DataTable dataTable = new DataTable();
 
             MainClass.con.Open();

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -58,7 +58,7 @@ namespace Restaurant.Model
         {
             string qry = @"SELECT DISTINCT RoleID, RoleName FROM TblRole";
 
-            using (SqlDataAdapter adapter = new SqlDataAdapter(qry, MainClass.con))
+            using (OleDbDataAdapter adapter = new OleDbDataAdapter(qry, MainClass.con))
             {
                 DataTable dataTable = new DataTable();
                 try

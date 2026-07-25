@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -55,14 +55,14 @@ namespace Restaurant.Model
                     SET Total = @total, Recieved = @rec, Change = @chan, PaidDateTime = @dateTime, Status = 'Paid' 
                     WHERE MainID = @id";
 
-            using (SqlCommand cmd = new SqlCommand(qry, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
             {
                 // Define parameters and their values
-                cmd.Parameters.Add(new SqlParameter("@id", SqlDbType.Int)).Value = MainID;
-                cmd.Parameters.Add(new SqlParameter("@total", SqlDbType.Decimal)).Value = Convert.ToDecimal(txtBillAmount.Text);
-                cmd.Parameters.Add(new SqlParameter("@rec", SqlDbType.Decimal)).Value = Convert.ToDecimal(txtPayRecieved.Text);
-                cmd.Parameters.Add(new SqlParameter("@chan", SqlDbType.Decimal)).Value = Convert.ToDecimal(txtChange.Text);
-                cmd.Parameters.Add(new SqlParameter("@dateTime", SqlDbType.DateTime)).Value = DateTime.Now; // Includes both date and time
+                cmd.Parameters.Add(new OleDbParameter("@id", OleDbType.Integer)).Value = MainID;
+                cmd.Parameters.Add(new OleDbParameter("@total", OleDbType.Decimal)).Value = Convert.ToDecimal(txtBillAmount.Text);
+                cmd.Parameters.Add(new OleDbParameter("@rec", OleDbType.Decimal)).Value = Convert.ToDecimal(txtPayRecieved.Text);
+                cmd.Parameters.Add(new OleDbParameter("@chan", OleDbType.Decimal)).Value = Convert.ToDecimal(txtChange.Text);
+                cmd.Parameters.Add(new OleDbParameter("@dateTime", OleDbType.Date)).Value = DateTime.Now; // Includes both date and time
 
                 try
                 {

@@ -1,4 +1,4 @@
-﻿namespace Restaurant
+namespace Restaurant
 {
     partial class LoginForm
     {

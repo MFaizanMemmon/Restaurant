@@ -1,11 +1,11 @@
-﻿using Guna.UI2.WinForms;
+using Guna.UI2.WinForms;
 using Restaurant.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -29,14 +29,14 @@ namespace Restaurant.View
                          "INNER JOIN Category c ON c.CategoryID = p.CategoryID " +
                          "WHERE p.ProductName LIKE @ProductName order by 1 desc";
 
-            using (SqlCommand cmd = new SqlCommand(qry, MainClass.con)) // Initialize SqlCommand
+            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con)) // Initialize OleDbCommand
             {
                 cmd.Parameters.AddWithValue("@ProductName", "%" + txtSearch.Text + "%");
 
                 // Open connection
                 MainClass.con.Open();
 
-                using (SqlDataReader dr = cmd.ExecuteReader()) // Execute query
+                using (OleDbDataReader dr = cmd.ExecuteReader()) // Execute query
                 {
                     guna2DataGridView1.Rows.Clear(); // Clear previous data
 
@@ -52,7 +52,7 @@ namespace Restaurant.View
                     }
                 }
 
-                MainClass.con.Close(); // Close SqlConnection
+                MainClass.con.Close(); // Close OleDbConnection
             }
 
             // Ensure that the columns are added if not present

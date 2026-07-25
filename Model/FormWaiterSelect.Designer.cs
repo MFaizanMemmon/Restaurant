@@ -1,4 +1,4 @@
-﻿namespace Restaurant.Model
+namespace Restaurant.Model
 {
     partial class FormWaiterSelect
     {

@@ -1,4 +1,4 @@
-﻿
+
 namespace Restaurant
 {
     partial class FormCashLedger

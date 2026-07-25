@@ -1,4 +1,4 @@
-﻿using Restaurant.Model;
+using Restaurant.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 
 namespace Restaurant.View
 {
@@ -25,14 +25,14 @@ namespace Restaurant.View
         {
             string qry = "SELECT s.StaffID,s.StaffName,s.StaffPhone,s.StaffRole FROM Staff s where s.StaffName LIKE @StaffName order by 1 desc";
 
-            using (SqlCommand cmd = new SqlCommand(qry, MainClass.con)) // Initialize SqlCommand
+            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con)) // Initialize OleDbCommand
             {
                 cmd.Parameters.AddWithValue("@StaffName", "%" + txtSearch.Text + "%");
 
                 // Open connection
                 MainClass.con.Open();
 
-                using (SqlDataReader dr = cmd.ExecuteReader()) // Execute query
+                using (OleDbDataReader dr = cmd.ExecuteReader()) // Execute query
                 {
                     guna2DataGridView1.Rows.Clear(); // Clear previous data
 
@@ -47,7 +47,7 @@ namespace Restaurant.View
                     }
                 }
 
-                MainClass.con.Close(); // Close SqlConnection
+                MainClass.con.Close(); // Close OleDbConnection
             }
             if (guna2DataGridView1.Columns.Count == 0)
             {

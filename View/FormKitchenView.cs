@@ -1,9 +1,9 @@
-﻿using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.CrystalReports.Engine;
 using Restaurant.Reportss;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -50,12 +50,12 @@ namespace Restaurant.View
         ORDER BY
             d.ordercount DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (OleDbConnection con = new OleDbConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (OleDbCommand cmd = new OleDbCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@InvoiceId", invoiceId);
-                    SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                    OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
                     DataTable dataTable = new DataTable();
                     adapter.Fill(dataTable);
                     guna2DataGridView1.DataSource = dataTable;
@@ -186,7 +186,7 @@ namespace Restaurant.View
                 WHERE Status = 'Complete' 
                 ORDER BY 1 DESC";
 
-            using (SqlDataAdapter adapter = new SqlDataAdapter(query, MainClass.con))
+            using (OleDbDataAdapter adapter = new OleDbDataAdapter(query, MainClass.con))
             {
                 DataTable table = new DataTable();
                 adapter.Fill(table);
@@ -203,7 +203,7 @@ namespace Restaurant.View
                 INNER JOIN Product p ON p.ProductID = d.ProID 
                 WHERE m.MainID = @MainID";
 
-            using (SqlDataAdapter adapter = new SqlDataAdapter(query, MainClass.con))
+            using (OleDbDataAdapter adapter = new OleDbDataAdapter(query, MainClass.con))
             {
                 adapter.SelectCommand.Parameters.AddWithValue("@MainID", mainID);
                 DataTable table = new DataTable();
@@ -336,15 +336,15 @@ namespace Restaurant.View
                 var reportDocument = new ReportDocument();
                 string reportPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\Reportss\crptOrderReports.rpt");
 
-                using (SqlConnection con = new SqlConnection(MainClass.con.ConnectionString))
+                using (OleDbConnection con = new OleDbConnection(MainClass.con.ConnectionString))
                 {
-                    using (SqlCommand cmd = new SqlCommand("usp_GetBill", con))
+                    using (OleDbCommand cmd = new OleDbCommand("usp_GetBill", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@InvoiceId", mainID);
 
                         var billDataSet = new DSBill();
-                        var adapter = new SqlDataAdapter(cmd);
+                        var adapter = new OleDbDataAdapter(cmd);
                         adapter.Fill(billDataSet, "BillDT");
 
                         reportDocument.Load(reportPath);
@@ -393,11 +393,11 @@ namespace Restaurant.View
 
             DataTable dt = new DataTable();
 
-            using (SqlCommand cmd = new SqlCommand(query, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(query, MainClass.con))
             {
                 cmd.Parameters.AddWithValue("@MainID", mainId);
 
-                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                using (OleDbDataAdapter adapter = new OleDbDataAdapter(cmd))
                 {
                     try
                     {

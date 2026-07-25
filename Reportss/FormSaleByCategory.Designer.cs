@@ -1,4 +1,4 @@
-﻿
+
 namespace Restaurant.Reportss
 {
     partial class FormSaleByCategory

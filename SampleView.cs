@@ -1,4 +1,4 @@
-﻿using Guna.UI2.WinForms;
+using Guna.UI2.WinForms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

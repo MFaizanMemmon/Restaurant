@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -39,8 +39,8 @@ namespace Restaurant.Model
                 qry = "UPDATE TblCashIn SET DateTime = @DateTime, CashMode = @CashMode ,Amount = @Amount, Notes = @Notes, createBy = @createBy, ModifyBy = @ModifyBy WHERE CashID = @id";
             }
 
-            using (SqlConnection conn = new SqlConnection(MainClass.con_string))
-            using (SqlCommand cmd = new SqlCommand(qry, conn))
+            using (OleDbConnection conn = new OleDbConnection(MainClass.con_string))
+            using (OleDbCommand cmd = new OleDbCommand(qry, conn))
             {
                 // Convert text input to appropriate types
                 DateTime expDate;
@@ -128,12 +128,12 @@ namespace Restaurant.Model
                    FROM TblCashIn 
                    WHERE CashID = @CashID";
 
-            using (SqlCommand cmd = new SqlCommand(qry, MainClass.con))
+            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
             {
                 // Add parameter to the query
                 cmd.Parameters.AddWithValue("@CashID", id);
 
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                OleDbDataAdapter da = new OleDbDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -26,14 +26,14 @@ namespace Restaurant.View
 
             string qry = "SELECT * FROM Category WHERE CategoryName LIKE '%" + txtSearch.Text + "%' order by 1 desc";
 
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con); // Initialize SqlCommand
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con); // Initialize OleDbCommand
 
             cmd.Parameters.AddWithValue("@CategoryName", "%" + txtSearch.Text + "%");
 
             // Open connection
             MainClass.con.Open();
 
-            SqlDataReader dr = cmd.ExecuteReader(); // Execute query
+            OleDbDataReader dr = cmd.ExecuteReader(); // Execute query
 
             guna2DataGridView1.Rows.Clear(); // Clear previous data
 
@@ -45,8 +45,8 @@ namespace Restaurant.View
                 );
             }
 
-            dr.Close(); // Close SqlDataReader
-            MainClass.con.Close(); // Close SqlConnection
+            dr.Close(); // Close OleDbDataReader
+            MainClass.con.Close(); // Close OleDbConnection
         }
 
 

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -38,8 +38,8 @@ namespace Restaurant.Model
         private void LoadProducts()
         {
             string qry = "SELECT * FROM Product INNER JOIN Category ON Product.CategoryID = Category.CategoryID";
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con);
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             DataTable dt = new DataTable();
             da.Fill(dt);
 
@@ -117,8 +117,8 @@ namespace Restaurant.Model
         private void AddCategory()
         {
             string qry = "select * from Category";
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con);
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             DataTable dt = new DataTable();
             da.Fill(dt);
 
@@ -169,8 +169,7 @@ namespace Restaurant.Model
             if (MainID == 0) // Insert
             {
                 qry1 = @"INSERT INTO TblMainReturn (Date, Time, TableName, WaiterName, Status, OrderType, Total, Recieved, Change, DriverID, CustName, CustPhone,InvoiceID,Reson)
-                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone,@InvoiceID,@Reson);
-                 SELECT SCOPE_IDENTITY();";
+                 VALUES (@Date, @Time, @TableName, @WaiterName, @Status, @OrderType, @Total, @Recieved, @Change, @DriverID, @CustName, @CustPhone,@InvoiceID,@Reson);";
             }
             else // Update
             {
@@ -179,7 +178,7 @@ namespace Restaurant.Model
                  WHERE MainID = @ID;";
             }
 
-            SqlCommand cmd = new SqlCommand(qry1, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(qry1, MainClass.con);
 
             if (MainID != 0)
             {
@@ -201,7 +200,7 @@ namespace Restaurant.Model
             cmd.Parameters.AddWithValue("@Reson", txtReson.Text);
 
             if (MainClass.con.State == ConnectionState.Closed) { MainClass.con.Open(); }
-            if (MainID == 0) { MainID = Convert.ToInt32(cmd.ExecuteScalar()); } else { cmd.ExecuteNonQuery(); }
+            if (MainID == 0) { cmd.ExecuteNonQuery(); MainID = MainClass.GetLastIdentity(); } else { cmd.ExecuteNonQuery(); }
             if (MainClass.con.State == ConnectionState.Open) { MainClass.con.Close(); }
 
             foreach (DataGridViewRow row in guna2DataGridView1.Rows)
@@ -220,7 +219,7 @@ namespace Restaurant.Model
                           WHERE DetailID = @ID";
                 }
 
-                SqlCommand cmd2 = new SqlCommand(qry2, MainClass.con);
+                OleDbCommand cmd2 = new OleDbCommand(qry2, MainClass.con);
                 if (DetailID != 0)
                 {
                     cmd2.Parameters.AddWithValue("@ID", DetailID);

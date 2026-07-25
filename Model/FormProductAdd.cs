@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -23,7 +23,7 @@ namespace Restaurant.Model
         private void FormProductAdd_Load(object sender, EventArgs e)
         {
            
-            string qry = "select CategoryID  'id', CategoryName  'name' from Category ";
+            string qry = "select CategoryID AS id, CategoryName AS [name] from Category ";
 
             MainClass.CBFill(qry, cbCateory);
 
@@ -96,8 +96,8 @@ namespace Restaurant.Model
         private void ForUpdateLoadData()
         {
             string qry = @"select * from Product where ProductiD = '" + id + "' ";
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con);
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             DataTable dt = new DataTable();
             da.Fill(dt);
 

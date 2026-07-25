@@ -1,9 +1,9 @@
-﻿using Restaurant.Reportss;
+using Restaurant.Reportss;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -31,10 +31,10 @@ namespace Restaurant.View
         {
             string qry = @"select * from Product ";
 
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con);
             MainClass.con.Open();
             DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             da.Fill(dt);
             MainClass.con.Close();
 
@@ -51,10 +51,10 @@ namespace Restaurant.View
         private void btnStaff_Click(object sender, EventArgs e)
         {
             string qry = @"select * from Staff";
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con);
             MainClass.con.Open();
             DataTable dt = new DataTable();
-            SqlDataAdapter adpt = new SqlDataAdapter(cmd);
+            OleDbDataAdapter adpt = new OleDbDataAdapter(cmd);
             adpt.Fill(dt);
 
             MainClass.con.Close();
@@ -96,28 +96,26 @@ namespace Restaurant.View
                 try
                 {
                     // Your deletion queries
-                    string deleteQuery1 = "truncate table tblMain";
+                    string deleteQuery1 = "DELETE FROM tblMain";
                     string deleteQuery2 = "DELETE FROM tblDetail";
                     string deleteQuery3 = "DELETE FROM tblExpence";
                     string deleteQuery4 = "DELETE FROM tblMainReturn";
                     string deleteQuery5 = "DELETE FROM tblDetailReturn";
                     string deleteQuery6 = "DELETE FROM TblCashIn";
                     string deleteQuery7 = "DELETE FROM tblOrderLog";
-                    string resetIdentityQuery = "DBCC CHECKIDENT ('tblMain', RESEED, 0)";
 
                     // Get today's date
                     DateTime today = DateTime.Today.AddDays(-2);
 
 
                     // Execute the deletion for each table
-                    using (SqlCommand cmd1 = new SqlCommand(deleteQuery1, MainClass.con))
-                    using (SqlCommand cmd2 = new SqlCommand(deleteQuery2, MainClass.con))
-                    using (SqlCommand cmd3 = new SqlCommand(deleteQuery3, MainClass.con))
-                    using (SqlCommand cmd4 = new SqlCommand(deleteQuery4, MainClass.con))
-                    using (SqlCommand cmd5 = new SqlCommand(deleteQuery5, MainClass.con))
-                    using (SqlCommand cmd6 = new SqlCommand(deleteQuery6, MainClass.con))
-                    using (SqlCommand cmd7 = new SqlCommand(deleteQuery7, MainClass.con))
-                    using (SqlCommand cmd8 = new SqlCommand(resetIdentityQuery, MainClass.con))
+                    using (OleDbCommand cmd1 = new OleDbCommand(deleteQuery1, MainClass.con))
+                    using (OleDbCommand cmd2 = new OleDbCommand(deleteQuery2, MainClass.con))
+                    using (OleDbCommand cmd3 = new OleDbCommand(deleteQuery3, MainClass.con))
+                    using (OleDbCommand cmd4 = new OleDbCommand(deleteQuery4, MainClass.con))
+                    using (OleDbCommand cmd5 = new OleDbCommand(deleteQuery5, MainClass.con))
+                    using (OleDbCommand cmd6 = new OleDbCommand(deleteQuery6, MainClass.con))
+                    using (OleDbCommand cmd7 = new OleDbCommand(deleteQuery7, MainClass.con))
                     {
                         
                         // Open the connection
@@ -132,7 +130,6 @@ namespace Restaurant.View
                         cmd5.ExecuteNonQuery();
                         cmd6.ExecuteNonQuery();
                         cmd7.ExecuteNonQuery();
-                        cmd8.ExecuteNonQuery();
 
 
                         // Success message
@@ -183,16 +180,16 @@ group by
     d.qty, 
     p.ProductPrice";
 
-            // Create a SqlCommand object
-            SqlCommand cmd = new SqlCommand(qry, MainClass.con);
+            // Create a OleDbCommand object
+            OleDbCommand cmd = new OleDbCommand(qry, MainClass.con);
 
             MainClass.con.Open();
 
             // Create a new DataSet (assuming you have a dataset defined in your project)
             DSDeleteBill ds = new DSDeleteBill();
 
-            // Use SqlDataAdapter to fill the dataset
-            SqlDataAdapter adpt = new SqlDataAdapter(cmd);
+            // Use OleDbDataAdapter to fill the dataset
+            OleDbDataAdapter adpt = new OleDbDataAdapter(cmd);
             adpt.Fill(ds, "DtDeleteOrSaleReport"); 
 
             MainClass.con.Close();

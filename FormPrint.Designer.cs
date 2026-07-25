@@ -1,4 +1,4 @@
-﻿
+
 namespace Restaurant
 {
     partial class FormPrint
@@ -29,7 +29,7 @@ namespace Restaurant
         /// </summary>
         private void InitializeComponent()
         {
-            this.crystalReportViewer1 = new CrystalDecisions.Windows.Forms.CrystalReportViewer();
+            this.crystalReportViewer1 = new Restaurant.ReportViewerControl();
             this.btnExit = new Guna.UI2.WinForms.Guna2ControlBox();
             this.guna2ControlBox2 = new Guna.UI2.WinForms.Guna2ControlBox();
             this.btnMax = new Guna.UI2.WinForms.Guna2ControlBox();
@@ -109,7 +109,7 @@ namespace Restaurant
         }
 
         #endregion
-        public CrystalDecisions.Windows.Forms.CrystalReportViewer crystalReportViewer1;
+        public Restaurant.ReportViewerControl crystalReportViewer1;
         private Guna.UI2.WinForms.Guna2ControlBox btnExit;
         private Guna.UI2.WinForms.Guna2ControlBox guna2ControlBox2;
         private Guna.UI2.WinForms.Guna2ControlBox btnMax;

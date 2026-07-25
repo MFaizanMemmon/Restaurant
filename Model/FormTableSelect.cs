@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -24,9 +24,9 @@ namespace Restaurant.Model
         private void FormTableSelect_Load(object sender, EventArgs e)
         {
             string qry = "select * from Tables";
-            SqlCommand cmd = new SqlCommand(qry , MainClass.con);
+            OleDbCommand cmd = new OleDbCommand(qry , MainClass.con);
             DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             da.Fill(dt);
 
             foreach (DataRow row in dt.Rows)
