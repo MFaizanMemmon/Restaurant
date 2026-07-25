@@ -2,7 +2,6 @@ using CrystalDecisions.CrystalReports.Engine;
 using Restaurant.View;
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,14 +19,17 @@ namespace Restaurant.Model
 {
     public partial class FormPOS : Form
     {
-        private System.Timers.Timer _searchTimer;
+        private readonly System.Windows.Forms.Timer _searchTimer;
         private const int DebounceDelay = 300; // Delay in milliseconds
         public FormPOS()
         {
             InitializeComponent();
-            _searchTimer = new System.Timers.Timer(DebounceDelay);
-            _searchTimer.AutoReset = false; // Ensures the timer runs only once per delay
-            _searchTimer.Elapsed += async (s, e) => await PerformSearchAsync(txtSearch.Text.Trim().ToLower());
+            _searchTimer = new System.Windows.Forms.Timer { Interval = DebounceDelay };
+            _searchTimer.Tick += async (s, e) =>
+            {
+                _searchTimer.Stop();
+                await PerformSearchAsync(txtSearch.Text.Trim());
+            };
         }
         public int MainID = 0;
         public string OrderType = "";
@@ -39,8 +41,7 @@ namespace Restaurant.Model
         private async void FormPOS_Load(object sender, EventArgs e)
         {
             guna2DataGridView1.BorderStyle = BorderStyle.FixedSingle;
-            AddCategory();
-            ProductPanel.Controls.Clear();
+            await AddCategoryAsync();
             await LoadProductsAsync();
         }
         private void btnexit_Click(object sender, EventArgs e)
@@ -48,7 +49,7 @@ namespace Restaurant.Model
             this.Close();
         }
 
-        private async void AddCategory()
+        private async Task AddCategoryAsync()
         {
             string qry = "SELECT CategoryName FROM Category order by CategoryName asc";
             DataTable dt = new DataTable();
@@ -62,30 +63,29 @@ namespace Restaurant.Model
                 await Task.Run(() => da.Fill(dt));
             }
 
-            // Avoid updating UI controls directly in a background thread
-            CategoryPanel.Invoke((MethodInvoker)delegate
+            CategoryPanel.SuspendLayout();
+            try
             {
                 CategoryPanel.Controls.Clear();
-
-                if (dt.Rows.Count > 0)
+                var buttons = new List<Control>(dt.Rows.Count);
+                foreach (DataRow row in dt.Rows)
                 {
-                    foreach (DataRow row in dt.Rows)
+                    Guna.UI2.WinForms.Guna2Button b = new Guna.UI2.WinForms.Guna2Button
                     {
-                        Guna.UI2.WinForms.Guna2Button b = new Guna.UI2.WinForms.Guna2Button
-                        {
-                            FillColor = Color.FromArgb(50, 55, 89),
-                            Size = new Size(134, 45),
-                            ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton,
-                            Text = row["CategoryName"].ToString()
-                        };
-
-                        // Event for click
-                        b.Click += b_Click;
-
-                        CategoryPanel.Controls.Add(b);
-                    }
+                        FillColor = Color.FromArgb(50, 55, 89),
+                        Size = new Size(134, 45),
+                        ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton,
+                        Text = row["CategoryName"].ToString()
+                    };
+                    b.Click += b_Click;
+                    buttons.Add(b);
                 }
-            });
+                CategoryPanel.Controls.AddRange(buttons.ToArray());
+            }
+            finally
+            {
+                CategoryPanel.ResumeLayout(true);
+            }
         }
 
 
@@ -141,28 +141,17 @@ namespace Restaurant.Model
 
 
 
-        private async Task AddItemsAsync(string id, string ProID, string name, string cat, string price, Image Pimage)
+        private UsProduct CreateProductControl(int productId, string name, string cat, string price, Image productImage)
         {
             var w = new UsProduct()
             {
                 PName = name,
                 pPrice = price,
                 PCategory = cat,
-                PIameg = Pimage,
-                id = Convert.ToInt32(ProID)
+                PIameg = productImage,
+                id = productId
             };
-
-            // Ensure UI updates are performed on the main thread
-            if (ProductPanel.InvokeRequired)
-            {
-                ProductPanel.Invoke(new Action(() => ProductPanel.Controls.Add(w)));
-            }
-            else
-            {
-                ProductPanel.Controls.Add(w);
-            }
-
-            w.onSelect += async (ss, ee) =>
+            w.onSelect += (ss, ee) =>
             {
                 var wdg = (UsProduct)ss;
 
@@ -246,6 +235,7 @@ namespace Restaurant.Model
                // txtSearch.Text = string.Empty;
                 txtSearch.Focus();
             };
+            return w;
         }
 
         private async Task LoadProductsAsync()
@@ -254,109 +244,100 @@ namespace Restaurant.Model
                            "FROM Product " +
                            "INNER JOIN Category ON Product.CategoryID = Category.CategoryID Order by ProductName asc";
 
-            using (OleDbCommand cmd = new OleDbCommand(query, MainClass.con))
-            using (OleDbDataAdapter da = new OleDbDataAdapter(cmd))
+            DataTable dt = await Task.Run(() =>
             {
-                DataTable dt = new DataTable();
-                await Task.Run(() => da.Fill(dt)); // Fill the DataTable asynchronously
-
-                // Clear existing controls from the panel
-                if (ProductPanel.InvokeRequired)
+                var table = new DataTable();
+                using (var connection = new OleDbConnection(MainClass.con_string))
+                using (var command = new OleDbCommand(query, connection))
+                using (var adapter = new OleDbDataAdapter(command))
                 {
-                    ProductPanel.Invoke(new Action(() => ProductPanel.Controls.Clear()));
+                    adapter.Fill(table);
                 }
-                else
-                {
-                    ProductPanel.Controls.Clear();
-                }
+                return table;
+            });
 
+            var products = await Task.Run(() =>
+            {
+                var result = new List<ProductDisplayData>(dt.Rows.Count);
                 foreach (DataRow row in dt.Rows)
                 {
-                    int productId = Convert.ToInt32(row["ProductID"]);
-                    string productName = row["ProductName"].ToString();
-                    string categoryName = row["CategoryName"].ToString();
-                    string productPrice = row["ProductPrice"].ToString();
-
                     byte[] imageArray = row["ProductImage"] as byte[];
                     Image productImage = null;
-
                     if (imageArray != null && imageArray.Length > 0)
                     {
-                        using (MemoryStream ms = new MemoryStream(imageArray))
+                        try
                         {
-                            productImage = await Task.Run(() => Image.FromStream(ms)); // Load image asynchronously
+                            using (var stream = new MemoryStream(imageArray))
+                            using (var source = Image.FromStream(stream))
+                            {
+                                productImage = new Bitmap(source);
+                            }
                         }
+                        catch (ArgumentException) { }
                     }
-
-                    // Add item to the panel
-                    await AddItemsAsync(productId.ToString(), productId.ToString(), productName, categoryName, productPrice, productImage);
+                    result.Add(new ProductDisplayData
+                    {
+                        Id = Convert.ToInt32(row["ProductID"]),
+                        Name = row["ProductName"].ToString(),
+                        Category = row["CategoryName"].ToString(),
+                        Price = row["ProductPrice"].ToString(),
+                        Image = productImage
+                    });
                 }
-            }
+                return result;
+            });
 
-            // Optionally, you can call a method to update the UI or perform any additional tasks
-            // UpdateProductPanel(); // If needed
+            ProductPanel.SuspendLayout();
+            try
+            {
+                ProductPanel.Controls.Clear();
+                Control[] controls = products
+                    .Select(p => (Control)CreateProductControl(p.Id, p.Name, p.Category, p.Price, p.Image))
+                    .ToArray();
+                ProductPanel.Controls.AddRange(controls);
+            }
+            finally
+            {
+                ProductPanel.ResumeLayout(true);
+            }
+        }
+
+        private sealed class ProductDisplayData
+        {
+            public int Id;
+            public string Name;
+            public string Category;
+            public string Price;
+            public Image Image;
         }
 
 
 
 
-
-        private async void txtSearch_TextChanged(object sender, EventArgs e)
+        private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             // Reset the timer to debounce the search
             _searchTimer.Stop();
             _searchTimer.Start();
         }
 
-        private async Task PerformSearchAsync(string searchText)
+        private Task PerformSearchAsync(string searchText)
         {
-            if (string.IsNullOrEmpty(searchText))
+            ProductPanel.SuspendLayout();
+            try
             {
-                // Show all items if the search text is empty
-                await Task.Run(() =>
+                foreach (UsProduct item in ProductPanel.Controls.OfType<UsProduct>())
                 {
-                    foreach (var item in ProductPanel.Controls.OfType<UsProduct>())
-                    {
-                        if (item.InvokeRequired)
-                        {
-                            item.Invoke(new Action(() => item.Visible = true));
-                        }
-                        else
-                        {
-                            item.Visible = true;
-                        }
-                    }
-                });
-                return;
-            }
-
-            var visibilityResults = new ConcurrentDictionary<UsProduct, bool>();
-
-            await Task.Run(() =>
-            {
-                Parallel.ForEach(ProductPanel.Controls.OfType<UsProduct>(), item =>
-                {
-                    bool matches = !string.IsNullOrEmpty(item.PName) &&
-                                    item.PName.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
-                    visibilityResults[item] = matches;
-                });
-            });
-
-            // Update UI in a single operation
-            ProductPanel.BeginInvoke(new Action(() =>
-            {
-                foreach (var kvp in visibilityResults)
-                {
-                    if (kvp.Key.InvokeRequired)
-                    {
-                        kvp.Key.Invoke(new Action(() => kvp.Key.Visible = kvp.Value));
-                    }
-                    else
-                    {
-                        kvp.Key.Visible = kvp.Value;
-                    }
+                    item.Visible = string.IsNullOrWhiteSpace(searchText) ||
+                        (!string.IsNullOrEmpty(item.PName) &&
+                         item.PName.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0);
                 }
-            }));
+            }
+            finally
+            {
+                ProductPanel.ResumeLayout(true);
+            }
+            return Task.CompletedTask;
         }
 
         private void GetTotal()
