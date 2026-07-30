@@ -76,9 +76,16 @@ Private Sub EnsureIndex(ByVal indexName As String, ByVal tableName As String, By
 End Sub
 
 Private Sub SeedDefaults()
-    If DCount("*", "TblRole") = 0 Then CurrentDb.Execute "INSERT INTO TblRole (RoleName) VALUES ('Administrator')"
+    EnsureRole "Administrator"
+    EnsureRole "Waiter"
+    EnsureRole "Driver"
     If DCount("*", "Users") = 0 Then
         CurrentDb.Execute "INSERT INTO Users (UName, UPass, UserName, RoleId) VALUES ('admin','admin','Administrator',1)"
     End If
 End Sub
 
+Private Sub EnsureRole(ByVal roleName As String)
+    If DCount("*", "TblRole", "RoleName='" & Replace(roleName, "'", "''") & "'") = 0 Then
+        CurrentDb.Execute "INSERT INTO TblRole (RoleName) VALUES ('" & Replace(roleName, "'", "''") & "')", dbFailOnError
+    End If
+End Sub

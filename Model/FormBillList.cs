@@ -259,7 +259,8 @@ namespace Restaurant.Model
 
                 // Print the report directly
                 // 'false' here means the report won't be sent to the print preview but will go directly to the printer
-                reportDocument.PrintToPrinter(printerSettings, pageSettings, false);
+                PrintService.PrintOrPreview(
+                    reportDocument, printerSettings, pageSettings, "Unpaid Bill");
             }
         }
 
@@ -407,21 +408,22 @@ namespace Restaurant.Model
                                 m.Change AS 'Changed',
                                 d.ordercount
                             FROM
-                                TblMain m
-                                INNER JOIN tblOrderLog d ON m.MainID = d.MainID
-                                INNER JOIN Product p ON p.ProductID = d.itemid
+                                (TblMain AS m
+                                INNER JOIN tblOrderLog AS d ON m.MainID = d.MainID)
+                                INNER JOIN Product AS p ON p.ProductID = d.itemid
                             WHERE
-                                m.MainID = @InvoiceId AND d.ordercount = @OrderCount and IsDeleted = 0
+                                m.MainID = @InvoiceId AND d.ordercount = @OrderCount AND d.IsDeleted = 0
                                 AND (p.CategoryID = @CategoryId OR (@CategoryId IS NULL AND p.CategoryID <> 8))";
 
                 reportDocument.Load(reportPath);
 
                 // Print for CategoryID = 8
                 using (OleDbCommand cmd = new OleDbCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@InvoiceId", mainId);
-                    cmd.Parameters.AddWithValue("@CategoryId", 8);
-                    cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                    {
+                        cmd.Parameters.AddWithValue("@InvoiceId", mainId);
+                        cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                        cmd.Parameters.AddWithValue("@CategoryId", 8);
+                        cmd.Parameters.AddWithValue("@CategoryIdIsNull", 8);
 
                     var billDataSet = new DSBill();
                     var adapter = new OleDbDataAdapter(cmd);
@@ -444,17 +446,19 @@ namespace Restaurant.Model
                         //reportDocument.PrintOptions.PaperSize = (CrystalDecisions.Shared.PaperSize)pageSettings.PaperSize.RawKind;
 
                         // Print the report only if data exists
-                        reportDocument.PrintToPrinter(printerSettings, pageSettings, false);
+                        PrintService.PrintOrPreview(
+                            reportDocument, printerSettings, pageSettings, "Kitchen Order");
                     }
 
                 }
 
                 // Print for CategoryID != 8
                 using (OleDbCommand cmd = new OleDbCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@InvoiceId", mainId);
-                    cmd.Parameters.AddWithValue("@CategoryId", DBNull.Value);  // Null condition for CategoryID != 8
-                    cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                    {
+                        cmd.Parameters.AddWithValue("@InvoiceId", mainId);
+                        cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                        cmd.Parameters.Add("@CategoryId", OleDbType.Integer).Value = DBNull.Value;
+                        cmd.Parameters.Add("@CategoryIdIsNull", OleDbType.Integer).Value = DBNull.Value;
 
                     var billDataSet = new DSBill();
                     var adapter = new OleDbDataAdapter(cmd);
@@ -477,7 +481,8 @@ namespace Restaurant.Model
                        // reportDocument.PrintOptions.PaperSize = (CrystalDecisions.Shared.PaperSize)pageSettings.PaperSize.RawKind;
 
                         // Print the report only if data exists
-                        reportDocument.PrintToPrinter(printerSettings, pageSettings, false);
+                        PrintService.PrintOrPreview(
+                            reportDocument, printerSettings, pageSettings, "Kitchen Order");
                     }
 
                 }

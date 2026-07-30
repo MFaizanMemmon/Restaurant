@@ -21,6 +21,7 @@ namespace Restaurant.Model
 
         public double amt;
         public int MainID = 0;
+        public bool CheckoutCompleted { get; private set; }
         private void txtPayRecieved_TextChanged(object sender, EventArgs e)
         {
             double amt = 0;
@@ -50,32 +51,38 @@ namespace Restaurant.Model
                 return; // Exit the method to prevent saving invalid data
             }
 
-            // Proceed with updating the database if validation passes
-            string qry = @"UPDATE TblMain 
-                    SET Total = @total, Recieved = @rec, Change = @chan, PaidDateTime = @dateTime, Status = 'Paid' 
-                    WHERE MainID = @id";
-
-            using (OleDbCommand cmd = new OleDbCommand(qry, MainClass.con))
+            if (MainID <= 0)
             {
-                // Define parameters and their values
-                cmd.Parameters.Add(new OleDbParameter("@id", OleDbType.Integer)).Value = MainID;
-                cmd.Parameters.Add(new OleDbParameter("@total", OleDbType.Decimal)).Value = Convert.ToDecimal(txtBillAmount.Text);
-                cmd.Parameters.Add(new OleDbParameter("@rec", OleDbType.Decimal)).Value = Convert.ToDecimal(txtPayRecieved.Text);
-                cmd.Parameters.Add(new OleDbParameter("@chan", OleDbType.Decimal)).Value = Convert.ToDecimal(txtChange.Text);
-                cmd.Parameters.Add(new OleDbParameter("@dateTime", OleDbType.Date)).Value = DateTime.Now; // Includes both date and time
+                MessageBox.Show("No valid bill was selected for checkout.", "Checkout Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string qry = @"UPDATE TblMain
+                    SET Total = ?, Recieved = ?, [Change] = ?, PaidDateTime = ?, [Status] = ?
+                    WHERE MainID = ?";
+
+            using (var connection = new OleDbConnection(MainClass.con_string))
+            using (OleDbCommand cmd = new OleDbCommand(qry, connection))
+            {
+                cmd.Parameters.Add("@total", OleDbType.Currency).Value = Convert.ToDecimal(txtBillAmount.Text);
+                cmd.Parameters.Add("@rec", OleDbType.Currency).Value = Convert.ToDecimal(txtPayRecieved.Text);
+                cmd.Parameters.Add("@change", OleDbType.Currency).Value = Convert.ToDecimal(txtChange.Text);
+                cmd.Parameters.Add("@paidAt", OleDbType.Date).Value = DateTime.Now;
+                cmd.Parameters.Add("@status", OleDbType.VarWChar, 50).Value = "Paid";
+                cmd.Parameters.Add("@id", OleDbType.Integer).Value = MainID;
 
                 try
                 {
-                    if (MainClass.con.State == ConnectionState.Closed)
-                        MainClass.con.Open();
-
+                    connection.Open();
                     int result = cmd.ExecuteNonQuery();
 
                     if (result > 0)
                     {
+                        CheckoutCompleted = true;
                         guna2MessageDialog1.Buttons = Guna.UI2.WinForms.MessageDialogButtons.OK;
                         MessageBox.Show("Operation has been successfully done", "Notification");
-                        this.Close();
+                        Close();
                     }
                     else
                     {
@@ -86,12 +93,6 @@ namespace Restaurant.Model
                 {
                     MessageBox.Show("Error occurred during the update: " + ex.Message, "Error");
                 }
-                finally
-                {
-                    if (MainClass.con.State == ConnectionState.Open)
-                        MainClass.con.Close();
-                        
-                }
             }
            
         }
@@ -100,7 +101,8 @@ namespace Restaurant.Model
 
         private void FormCheckOut_Load(object sender, EventArgs e)
         {
-            txtBillAmount.Text = amt.ToString();
+            txtBillAmount.Text = amt.ToString("0.00");
+            txtPayRecieved.Focus();
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)

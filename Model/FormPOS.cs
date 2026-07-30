@@ -458,7 +458,7 @@ namespace Restaurant.Model
                 return;
             }
 
-            if (guna2DataGridView1.Rows.Count < 0)
+            if (!guna2DataGridView1.Rows.Cast<DataGridViewRow>().Any(row => !row.IsNewRow))
             {
 
                 MessageBox.Show("Please add Items");
@@ -999,54 +999,65 @@ namespace Restaurant.Model
         }
         public void LoadEntries()
         {
-            string Qry2 = @"SELECT 0,d.DetailID,p.ProductID,p.ProductName,d.Qty,d.Price,d.Amount,m.OrderType,m.TableName,m.waiterName,m.CustName,CustPhone from TblMain m INNER JOIN TblDetail d ON m.MainID = d.MainID INNER JOIN Product p ON p.ProductID = d.ProID WHERE m.MainID = " + id + " ";
+            const string query = @"
+                SELECT
+                    0 AS RowNo,
+                    d.DetailID,
+                    p.ProductID,
+                    p.ProductName,
+                    d.Qty,
+                    d.Price,
+                    d.Amount,
+                    m.OrderType,
+                    m.TableName,
+                    m.WaiterName,
+                    m.CustName,
+                    m.CustPhone
+                FROM
+                    (TblMain AS m
+                    INNER JOIN TblDetail AS d ON m.MainID = d.MainID)
+                    INNER JOIN Product AS p ON p.ProductID = d.ProID
+                WHERE m.MainID = ?";
 
-            OleDbCommand cmd = new OleDbCommand(Qry2, MainClass.con);
-            OleDbDataAdapter da = new OleDbDataAdapter(cmd);
             DataTable dt = new DataTable();
-            da.Fill(dt);
-            OrderType = dt.Rows[0]["OrderType"].ToString();
-            if (dt.Rows[0]["OrderType"].ToString() == "Din IN")
+            using (var connection = new OleDbConnection(MainClass.con_string))
+            using (var cmd = new OleDbCommand(query, connection))
+            using (var adapter = new OleDbDataAdapter(cmd))
             {
-                btnTakeaway.Checked = false;
-                btnDelivery.Checked = false;
-                btnDil.Checked = true;
-                lblWaiter.Visible = false;
-                lblTable.Visible = false;
+                int selectedMainId = MainID > 0 ? MainID : id;
+                cmd.Parameters.Add("@MainID", OleDbType.Integer).Value = selectedMainId;
+                adapter.Fill(dt);
             }
-            else if (dt.Rows[0]["OrderType"].ToString() == "Take Away")
-            {
-                btnDil.Checked = false;
-                btnDelivery.Checked = false;
-                btnTakeaway.Checked = true;
-                lblWaiter.Visible = true;
-                lblTable.Visible = true;
-                lblDriverName.Visible = true;
 
-            }
-            else
+            if (dt.Rows.Count == 0)
             {
-                btnDelivery.Checked = false;
-                btnDil.Checked = false;
-                btnDelivery.Checked = true;
-                lblWaiter.Visible = true;
-                lblTable.Visible = true;
-                lblDriverName.Visible = true;
+                guna2DataGridView1.Rows.Clear();
+                MessageBox.Show("No order items were found for this bill.", "Order not found",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
             }
+
+            DataRow firstRow = dt.Rows[0];
+            OrderType = firstRow["OrderType"].ToString();
+            bool isDineIn = string.Equals(OrderType, "Din IN", StringComparison.OrdinalIgnoreCase);
+            bool isTakeAway = string.Equals(OrderType, "Take Away", StringComparison.OrdinalIgnoreCase);
+
+            btnDil.Checked = isDineIn;
+            btnTakeaway.Checked = isTakeAway;
+            btnDelivery.Checked = !isDineIn && !isTakeAway;
+
+            lblTable.Text = firstRow["TableName"].ToString();
+            lblWaiter.Text = firstRow["WaiterName"].ToString();
+            lblDriverName.Text = firstRow["CustName"] + " " + firstRow["CustPhone"];
+
+            lblTable.Visible = !isDineIn || !string.IsNullOrWhiteSpace(lblTable.Text);
+            lblWaiter.Visible = !isDineIn || !string.IsNullOrWhiteSpace(lblWaiter.Text);
+            lblDriverName.Visible = !isDineIn;
 
             guna2DataGridView1.Rows.Clear();
 
             foreach (DataRow item in dt.Rows)
             {
-
-                // Extract data from DataRow
-
-                lblTable.Text = item["TableName"].ToString();
-                lblWaiter.Text = item["WaiterName"].ToString();
-                lblDriverName.Text = dt.Rows[0]["CustName"].ToString() + " " + dt.Rows[0]["CustPhone"].ToString();
-                //lblDriverName.Text = item[""].ToString();
-                lblWaiter.Visible = true;
-                lblTable.Visible = true;
                 string Detailid = item["DetailID"].ToString();
                 string Proid = item["ProductID"].ToString();
                 string ProName = item["ProductName"].ToString();
@@ -1250,6 +1261,9 @@ namespace Restaurant.Model
             from.amt = Convert.ToDouble(lbltotal.Text);
             MainClass.BlurBackground(from);
 
+            if (!from.CheckoutCompleted)
+                return;
+
             MainID = 0;
             guna2DataGridView1.Rows.Clear();
             lblTable.Text = "";
@@ -1362,21 +1376,22 @@ namespace Restaurant.Model
                                 m.Change AS 'Changed',
                                 d.ordercount
                             FROM
-                                TblMain m
-                                INNER JOIN tblOrderLog d ON m.MainID = d.MainID
-                                INNER JOIN Product p ON p.ProductID = d.itemid
+                                (TblMain AS m
+                                INNER JOIN tblOrderLog AS d ON m.MainID = d.MainID)
+                                INNER JOIN Product AS p ON p.ProductID = d.itemid
                             WHERE
-                                m.MainID = @InvoiceId AND d.ordercount = @OrderCount and IsDeleted = 0
+                                m.MainID = @InvoiceId AND d.ordercount = @OrderCount AND d.IsDeleted = 0
                                 AND (p.CategoryID = @CategoryId OR (@CategoryId IS NULL AND p.CategoryID <> 8))";
 
                 reportDocument.Load(reportPath);
 
                 // Print for CategoryID = 8
                 using (OleDbCommand cmd = new OleDbCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@InvoiceId", mainId);
-                    cmd.Parameters.AddWithValue("@CategoryId", 8);
-                    cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                    {
+                        cmd.Parameters.AddWithValue("@InvoiceId", mainId);
+                        cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                        cmd.Parameters.AddWithValue("@CategoryId", 8);
+                        cmd.Parameters.AddWithValue("@CategoryIdIsNull", 8);
 
                     var billDataSet = new DSBill();
                     var adapter = new OleDbDataAdapter(cmd);
@@ -1399,17 +1414,19 @@ namespace Restaurant.Model
                         reportDocument.PrintOptions.PaperSize = (CrystalDecisions.Shared.PaperSize)pageSettings.PaperSize.RawKind;
 
                         // Print the report only if data exists
-                        reportDocument.PrintToPrinter(printerSettings, pageSettings, false);
+                        PrintService.PrintOrPreview(
+                            reportDocument, printerSettings, pageSettings, "Kitchen Order");
                     }
 
                 }
 
                 // Print for CategoryID != 8
                 using (OleDbCommand cmd = new OleDbCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@InvoiceId", mainId);
-                    cmd.Parameters.AddWithValue("@CategoryId", DBNull.Value);  // Null condition for CategoryID != 8
-                    cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                    {
+                        cmd.Parameters.AddWithValue("@InvoiceId", mainId);
+                        cmd.Parameters.AddWithValue("@OrderCount", maxCategoryId);
+                        cmd.Parameters.Add("@CategoryId", OleDbType.Integer).Value = DBNull.Value;
+                        cmd.Parameters.Add("@CategoryIdIsNull", OleDbType.Integer).Value = DBNull.Value;
 
                     var billDataSet = new DSBill();
                     var adapter = new OleDbDataAdapter(cmd);
@@ -1432,7 +1449,8 @@ namespace Restaurant.Model
                         reportDocument.PrintOptions.PaperSize = (CrystalDecisions.Shared.PaperSize)pageSettings.PaperSize.RawKind;
 
                         // Print the report only if data exists
-                        reportDocument.PrintToPrinter(printerSettings, pageSettings, false);
+                        PrintService.PrintOrPreview(
+                            reportDocument, printerSettings, pageSettings, "Kitchen Order");
                     }
 
                 }

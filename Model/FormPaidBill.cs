@@ -178,7 +178,8 @@ namespace Restaurant.Model
 
                 // Print the report directly
                 // 'false' here means the report won't be sent to the print preview but will go directly to the printer
-                reportDocument.PrintToPrinter(printerSettings, pageSettings, false);
+                PrintService.PrintOrPreview(
+                    reportDocument, printerSettings, pageSettings, "Paid Bill");
             }
         }
 

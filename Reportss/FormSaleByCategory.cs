@@ -22,21 +22,18 @@ namespace Restaurant.Reportss
         {
             string qry = @"select 
     m.MainID, 
-    m.Date, 
-    m.Time, 
+    m.[Date], 
+    m.[Time], 
     p.ProductName, 
     d.qty as 'Qty', 
     p.ProductPrice as 'Price', 
     (d.qty * p.ProductPrice) as 'Amount'
    
 from 
-    TblMain m
-inner join 
-    tblOrderLog d on m.MainID = d.MainID
-inner join 
-    Product p on p.ProductID = d.itemid
-inner join 
-    Category c on c.CategoryID = p.CategoryID
+    ((TblMain AS m
+    INNER JOIN tblOrderLog AS d ON m.MainID = d.MainID)
+    INNER JOIN Product AS p ON p.ProductID = d.itemid)
+    INNER JOIN Category AS c ON c.CategoryID = p.CategoryID
 where 
     d.Isdeleted = 0
 
